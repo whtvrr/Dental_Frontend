@@ -14,6 +14,7 @@ import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 // import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutlined";
 // import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 // import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
@@ -153,6 +154,13 @@ const Sidebar = () => {
             >
               Pages
             </Typography>
+            <Item
+              title="Dental Chart"
+              to="/dental-chart"
+              icon={<LocalHospitalIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
             <Item
               title="Profile Form"
               to="/form"
