@@ -50,15 +50,18 @@ const LoginPage = () => {
 
       const data = await response.json();
 
-      if (response.ok && data.tokens) {
+      if (response.ok && data.data && data.data.tokens) {
+        // Handle new response format with nested tokens
+        const tokens = data.data.tokens;
+        
         // Save tokens to session storage
-        sessionStorage.setItem('access_token', data.tokens.access_token);
-        sessionStorage.setItem('refresh_token', data.tokens.refresh_token);
-        sessionStorage.setItem('expires_in', data.tokens.expires_in);
-        sessionStorage.setItem('token_type', data.tokens.token_type);
+        sessionStorage.setItem('access_token', tokens.access_token);
+        sessionStorage.setItem('refresh_token', tokens.refresh_token);
+        sessionStorage.setItem('expires_in', tokens.expires_in);
+        sessionStorage.setItem('token_type', tokens.token_type);
         
         // Update auth context
-        login(data.tokens);
+        login(tokens);
         
         setSubmitStatus({
           type: 'success',
