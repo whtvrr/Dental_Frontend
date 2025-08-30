@@ -1,18 +1,44 @@
-import {Box, IconButton, useTheme} from "@mui/material";
-import {useContext} from "react";
+import {Box, IconButton, useTheme, Typography, Menu, MenuItem, Chip} from "@mui/material";
+import {useContext, useState} from "react";
 import {ColorModeContext, tokens} from "../../theme";
+import {AuthContext} from "../../context/AuthContext";
 import InputBase from "@mui/material/InputBase";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import LogoutIcon from "@mui/icons-material/Logout";
 import SearchIcon from "@mui/icons-material/Search";
 
 const Topbar = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const colorMode = useContext(ColorModeContext);
+    const { user, logout } = useContext(AuthContext);
+    const [anchorEl, setAnchorEl] = useState(null);
+    
+    const handleMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+    
+    const handleLogout = () => {
+        logout();
+        handleMenuClose();
+    };
+    
+    const getRoleColor = (role) => {
+        switch(role) {
+            case 'admin': return colors.redAccent[500];
+            case 'doctor': return colors.blueAccent[500];
+            case 'receptionist': return colors.greenAccent[500];
+            default: return colors.grey[500];
+        }
+    };
 
     return (
     <Box display="flex" justifyContent="space-between" p={2}>
@@ -28,7 +54,26 @@ const Topbar = () => {
           </IconButton>
         </Box>
         {/* ICONS */}
-    <Box display = "flex">
+    <Box display="flex" alignItems="center" gap={1}>
+        {/* User Info */}
+        {user && (
+            <Box display="flex" alignItems="center" gap={1} mr={2}>
+                <Typography variant="body2" color={colors.grey[100]} fontWeight="bold">
+                    {user.fullName}
+                </Typography>
+                <Chip 
+                    label={user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                    size="small"
+                    sx={{
+                        backgroundColor: getRoleColor(user.role),
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '0.7rem'
+                    }}
+                />
+            </Box>
+        )}
+        
         <IconButton onClick={colorMode.toggleColorMode}>
             {theme.palette.mode === 'dark' ?(
                 <DarkModeOutlinedIcon/>
@@ -45,9 +90,28 @@ const Topbar = () => {
             <SettingsOutlinedIcon/>
         </IconButton>
         
-        <IconButton>
+        <IconButton onClick={handleMenuOpen}>
             <PersonOutlinedIcon/>
         </IconButton>
+        
+        <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+            PaperProps={{
+                sx: {
+                    backgroundColor: colors.primary[400],
+                    border: `1px solid ${colors.grey[700]}`,
+                    borderRadius: '8px',
+                    mt: 1
+                }
+            }}
+        >
+            <MenuItem onClick={handleLogout} sx={{ color: colors.grey[100] }}>
+                <LogoutIcon sx={{ mr: 1, fontSize: 18 }} />
+                <Typography variant="body2">Logout</Typography>
+            </MenuItem>
+        </Menu>
     </Box>
     </Box>);
 };
