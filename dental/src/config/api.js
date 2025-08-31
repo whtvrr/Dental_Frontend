@@ -12,10 +12,13 @@ const API_CONFIG = {
       SIGNIN: '/auth/signin',
       LOGIN: '/auth/login',
       LOGOUT: '/auth/logout',
+      REFRESH: '/auth/refresh',
     },
     USERS: {
       BASE: '/users',
       PROFILE: '/users/profile',
+      STAFF: '/users/staff',
+      CLIENTS: '/users/clients',
     },
     PATIENTS: {
       BASE: '/patients',

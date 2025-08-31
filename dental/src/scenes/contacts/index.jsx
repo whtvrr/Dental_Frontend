@@ -1,38 +1,38 @@
-import { Box } from "@mui/material";
+import { Box, useTheme, CircularProgress, Alert, Chip } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import { mockDataContacts } from "../../data/mockData";
+import { useState, useEffect } from "react";
 import Header from "../../components/Header";
-import { useTheme } from "@mui/material";
+import { useApi } from "../../hooks/useApi";
+import API_CONFIG from "../../config/api";
 
 const Contacts = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const api = useApi();
+  const [clientsData, setClientsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [offset, setOffset] = useState(0);
+  const [limit] = useState(50);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  };
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
-    { field: "registrarId", headerName: "Registrar ID" },
     {
-      field: "name",
-      headerName: "Name",
+      field: "full_name",
+      headerName: "Full Name",
       flex: 1,
       cellClassName: "name-column--cell",
     },
     {
-      field: "age",
-      headerName: "Age",
-      type: "number",
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "phone",
+      field: "phone_number",
       headerName: "Phone Number",
-      flex: 1,
-    },
-    {
-      field: "email",
-      headerName: "Email",
       flex: 1,
     },
     {
@@ -41,23 +41,70 @@ const Contacts = () => {
       flex: 1,
     },
     {
-      field: "city",
-      headerName: "City",
-      flex: 1,
+      field: "gender",
+      headerName: "Gender",
+      flex: 0.5,
+      renderCell: ({ row: { gender } }) => {
+        return (
+          <Chip
+            label={gender || 'N/A'}
+            color={gender === 'male' ? 'primary' : gender === 'female' ? 'secondary' : 'default'}
+            size="small"
+            sx={{ textTransform: 'capitalize' }}
+          />
+        );
+      },
     },
     {
-      field: "zipCode",
-      headerName: "Zip Code",
+      field: "birth_date",
+      headerName: "Birth Date",
       flex: 1,
+      renderCell: ({ row: { birth_date } }) => formatDate(birth_date),
     },
   ];
+
+  const fetchClients = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await api.get(`${API_CONFIG.ENDPOINTS.USERS.CLIENTS}?offset=${offset}&limit=${limit}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 200 && data.data?.clients) {
+          setClientsData(data.data.clients);
+        } else {
+          throw new Error('Invalid response format');
+        }
+      } else {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Failed to fetch clients:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchClients();
+  }, [offset]);
 
   return (
     <Box m="20px">
       <Header
-        title="CONTACTS"
-        subtitle="List of Contacts for Future Reference"
+        title="MANAGE CLIENTS"
+        subtitle="List of Clients for Future Reference"
       />
+      
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Error loading clients data: {error}
+        </Alert>
+      )}
+      
       <Box
         m="40px 0 0 0"
         height="75vh"
@@ -90,13 +137,18 @@ const Contacts = () => {
           },
         }}
       >
-        <DataGrid
-  rows={mockDataContacts}
-  columns={columns}
-//   slots={{ toolbar: GridToolbar }}
-showToolbar
-/>
-
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+            <CircularProgress />
+          </Box>
+        ) : (
+          <DataGrid
+            rows={clientsData}
+            columns={columns}
+            getRowId={(row) => row.id}
+            disableRowSelectionOnClick
+          />
+        )}
       </Box>
     </Box>
   );
