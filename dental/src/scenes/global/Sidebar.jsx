@@ -39,7 +39,7 @@ const Sidebar = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [selected, setSelected] = useState("Dashboard");
+    const [selected, setSelected] = useState("Панель управления");
     
   return (
     <Box
@@ -110,7 +110,7 @@ const Sidebar = () => {
                   ШАНС
                 </Typography>
                 <Typography variant="h5" color={colors.greenAccent[500]}>
-                  Admin Panel
+                  Панель администратора
                 </Typography>
               </Box>
             </Box>
@@ -118,7 +118,7 @@ const Sidebar = () => {
 
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
-              title="Dashboard"
+              title="Панель управления"
               to="/"
               icon={<HomeOutlinedIcon />}
               selected={selected}
@@ -130,17 +130,17 @@ const Sidebar = () => {
               color={colors.grey[300]}
               sx={{ m: "15px 0 5px 20px" }}
             >
-              Data
+              Данные
             </Typography>
             <Item
-              title="Manage Team"
+              title="Управление командой"
               to="/team"
               icon={<PeopleOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
-              title="Contacts Information"
+              title="Информация о контактах"
               to="/contacts"
               icon={<ContactsOutlinedIcon />}
               selected={selected}
@@ -152,31 +152,31 @@ const Sidebar = () => {
               color={colors.grey[300]}
               sx={{ m: "15px 0 5px 20px" }}
             >
-              Pages
+              Страницы
             </Typography>
             <Item
-              title="Dental Chart"
+              title="Зубная формула"
               to="/dental-chart"
               icon={<LocalHospitalIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
-              title="User Registration"
+              title="Регистрация пользователей"
               to="/registration"
               icon={<PersonOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
-              title="Calendar"
+              title="Календарь"
               to="/calendar"
               icon={<CalendarTodayOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
-              title="FAQ Page"
+              title="Часто задаваемые вопросы"
               to="/faq"
               icon={<HelpOutlineOutlinedIcon />}
               selected={selected}

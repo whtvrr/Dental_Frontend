@@ -65,7 +65,7 @@ const LoginPage = () => {
         
         setSubmitStatus({
           type: 'success',
-          message: 'Login successful! Redirecting...'
+          message: 'Вход выполнен успешно! Перенаправление...'
         });
         
         // Redirect to dashboard after short delay
@@ -75,13 +75,13 @@ const LoginPage = () => {
       } else {
         setSubmitStatus({
           type: 'error',
-          message: data.message || 'Login failed. Please check your credentials.'
+          message: data.message || 'Ошибка входа. Проверьте ваши данные.'
         });
       }
     } catch (error) {
       setSubmitStatus({
         type: 'error',
-        message: 'Network error. Please check your connection and try again.'
+        message: 'Ошибка сети. Проверьте подключение и попробуйте снова.'
       });
     } finally {
       setIsSubmitting(false);
@@ -170,7 +170,7 @@ const LoginPage = () => {
                 color={colors.grey[300]}
                 fontWeight="300"
               >
-                Sign in to your account
+                Войдите в свой аккаунт
               </Typography>
             </Box>
 
@@ -221,7 +221,7 @@ const LoginPage = () => {
                       fullWidth
                       variant="filled"
                       type="email"
-                      label="Email Address"
+                      label="Электронная почта"
                       onBlur={handleBlur}
                       onChange={handleChange}
                       value={values.email}
@@ -257,7 +257,7 @@ const LoginPage = () => {
                       fullWidth
                       variant="filled"
                       type={showPassword ? 'text' : 'password'}
-                      label="Password"
+                      label="Пароль"
                       onBlur={handleBlur}
                       onChange={handleChange}
                       value={values.password}
@@ -345,12 +345,12 @@ const LoginPage = () => {
                       {isSubmitting ? (
                         <Box display="flex" alignItems="center" gap={2}>
                           <CircularProgress size={24} color="inherit" />
-                          Signing in...
+                          Вход...
                         </Box>
                       ) : (
                         <Box display="flex" alignItems="center" gap={1}>
                           <LoginIcon />
-                          Sign In
+                          Войти
                         </Box>
                       )}
                     </Button>
@@ -366,7 +366,7 @@ const LoginPage = () => {
                 color={colors.grey[400]}
                 sx={{ opacity: 0.8 }}
               >
-                Secure login for authorized personnel only
+                Безопасный вход только для авторизованного персонала
               </Typography>
             </Box>
           </Paper>
@@ -379,12 +379,12 @@ const LoginPage = () => {
 const validationSchema = yup.object().shape({
   email: yup
     .string()
-    .email('Please enter a valid email address')
-    .required('Email address is required'),
+    .email('Введите корректный адрес электронной почты')
+    .required('Адрес электронной почты обязателен'),
   password: yup
     .string()
-    .min(1, 'Password is required')
-    .required('Password is required'),
+    .min(1, 'Пароль обязателен')
+    .required('Пароль обязателен'),
 });
 
 const initialValues = {

@@ -21,24 +21,8 @@ export const useDentalChart = (patientId) => {
       // const response = await fetch(`/api/patients/${patientId}/dental-chart`);
       // const data = await response.json();
       
-      // Sample data for demonstration
-      const sampleData = {
-        '24': { 
-          crown: 'crown', 
-          occlusal: 'cariesMedium', 
-          mesial: 'filling',
-          gum_mesial: 'gingivitis' 
-        },
-        '21': { crown: 'implant', root: 'missing' },
-        '46': { 
-          crown: 'crownMetal', 
-          cusp_mb: 'fracture', 
-          root_mesial: 'canal',
-          gum_distal: 'periodontitis'
-        },
-        '32': { crown: 'missing', root: 'missing' },
-        '15': { crown: 'pulpitis', mesial: 'cariesDeep' }
-      };
+      // Empty data - all teeth start in normal condition
+      const sampleData = {};
       
       setToothConditions(sampleData);
     } catch (err) {

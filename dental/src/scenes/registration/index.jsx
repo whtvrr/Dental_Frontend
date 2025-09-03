@@ -71,13 +71,13 @@ const RegistrationForm = () => {
         
         setSubmitStatus({
           type: 'success',
-          message: 'User registered successfully! Welcome to the ШАНС dental team.'
+          message: 'Пользователь успешно зарегистрирован! Добро пожаловать в команду ШАНС!'
         });
         resetForm();
       } else if (response.status === 400) {
         setSubmitStatus({
           type: 'error',
-          message: data.message || 'Registration failed. Please check your input and try again.'
+          message: data.message || 'Ошибка регистрации. Проверьте введенные данные и попробуйте снова.'
         });
       } else {
         throw new Error('Unexpected response status');
@@ -85,7 +85,7 @@ const RegistrationForm = () => {
     } catch (error) {
       setSubmitStatus({
         type: 'error',
-        message: 'Network error. Please check your connection and try again.'
+        message: 'Ошибка сети. Проверьте подключение и попробуйте снова.'
       });
     } finally {
       setIsSubmitting(false);
@@ -99,8 +99,8 @@ const RegistrationForm = () => {
   return (
     <Box m="20px">
       <Header 
-        title="USER REGISTRATION" 
-        subtitle="Create a new user account for internal staff members" 
+        title="РЕГИСТРАЦИЯ ПОЛЬЗОВАТЕЛЕЙ" 
+        subtitle="Создание новой учетной записи для внутренних сотрудников" 
       />
 
       <Fade in timeout={800}>
@@ -138,7 +138,7 @@ const RegistrationForm = () => {
           <Box display="flex" alignItems="center" mb={4} gap={2}>
             <PersonAddIcon sx={{ fontSize: 32, color: colors.greenAccent[500] }} />
             <Typography variant="h4" color={colors.grey[100]} fontWeight="bold">
-              New Staff Member Registration
+              Регистрация нового сотрудника
             </Typography>
           </Box>
 
@@ -168,7 +168,7 @@ const RegistrationForm = () => {
                     fullWidth
                     variant="filled"
                     type="email"
-                    label="Email Address"
+                    label="Электронная почта"
                     onBlur={handleBlur}
                     onChange={handleChange}
                     value={values.email}
@@ -190,7 +190,7 @@ const RegistrationForm = () => {
                     fullWidth
                     variant="filled"
                     type="text"
-                    label="Full Name"
+                    label="Полное имя"
                     onBlur={handleBlur}
                     onChange={handleChange}
                     value={values.full_name}
@@ -212,7 +212,7 @@ const RegistrationForm = () => {
                     fullWidth
                     variant="filled"
                     type="tel"
-                    label="Phone Number"
+                    label="Номер телефона"
                     onBlur={handleBlur}
                     onChange={handleChange}
                     value={values.phone_number}
@@ -234,7 +234,7 @@ const RegistrationForm = () => {
                     fullWidth
                     variant="filled"
                     type={showPassword ? 'text' : 'password'}
-                    label="Password"
+                    label="Пароль"
                     onBlur={handleBlur}
                     onChange={handleChange}
                     value={values.password}
@@ -271,7 +271,7 @@ const RegistrationForm = () => {
                     sx={{ gridColumn: "span 1" }}
                     disabled={isSubmitting}
                   >
-                    <InputLabel>Role</InputLabel>
+                    <InputLabel>Роль</InputLabel>
                     <Select
                       value={values.role}
                       onChange={handleChange}
@@ -291,7 +291,7 @@ const RegistrationForm = () => {
                             borderRadius="50%" 
                             bgcolor={colors.redAccent[500]}
                           />
-                          Admin
+                          Администратор
                         </Box>
                       </MenuItem>
                       <MenuItem value="doctor">
@@ -302,7 +302,7 @@ const RegistrationForm = () => {
                             borderRadius="50%" 
                             bgcolor={colors.blueAccent[500]}
                           />
-                          Doctor
+                          Врач
                         </Box>
                       </MenuItem>
                       <MenuItem value="receptionist">
@@ -313,7 +313,7 @@ const RegistrationForm = () => {
                             borderRadius="50%" 
                             bgcolor={colors.greenAccent[500]}
                           />
-                          Receptionist
+                          Регистратор
                         </Box>
                       </MenuItem>
                     </Select>
@@ -363,12 +363,12 @@ const RegistrationForm = () => {
                     {isSubmitting ? (
                       <Box display="flex" alignItems="center" gap={1}>
                         <CircularProgress size={20} color="inherit" />
-                        Registering...
+                        Регистрация...
                       </Box>
                     ) : (
                       <Box display="flex" alignItems="center" gap={1}>
                         <PersonAddIcon />
-                        Register User
+                        Зарегистрировать пользователя
                       </Box>
                     )}
                   </Button>
@@ -387,30 +387,30 @@ const phoneRegExp = /^[\+]?[\d\s\-\(\)]{10,}$/;
 const validationSchema = yup.object().shape({
   email: yup
     .string()
-    .email('Please enter a valid email address')
-    .required('Email address is required'),
+    .email('Введите корректный адрес электронной почты')
+    .required('Адрес электронной почты обязателен'),
   full_name: yup
     .string()
-    .min(2, 'Full name must be at least 2 characters')
-    .max(50, 'Full name must be less than 50 characters')
-    .matches(/^[a-zA-ZÀ-ÿ\s]+$/, 'Full name can only contain letters and spaces')
-    .required('Full name is required'),
+    .min(2, 'Полное имя должно содержать минимум 2 символа')
+    .max(50, 'Полное имя должно быть короче 50 символов')
+    .matches(/^[a-zA-ZÀ-ÿ\s]+$/, 'Полное имя может содержать только буквы и пробелы')
+    .required('Полное имя обязательно'),
   password: yup
     .string()
-    .min(8, 'Password must be at least 8 characters')
+    .min(8, 'Пароль должен содержать минимум 8 символов')
     .matches(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      'Password must contain at least one lowercase letter, one uppercase letter, and one number'
+      'Пароль должен содержать минимум одну строчную букву, одну заглавную букву и одну цифру'
     )
-    .required('Password is required'),
+    .required('Пароль обязателен'),
   phone_number: yup
     .string()
-    .matches(phoneRegExp, 'Please enter a valid phone number')
-    .required('Phone number is required'),
+    .matches(phoneRegExp, 'Введите корректный номер телефона')
+    .required('Номер телефона обязателен'),
   role: yup
     .string()
-    .oneOf(['admin', 'doctor', 'receptionist'], 'Please select a valid role')
-    .required('Role selection is required'),
+    .oneOf(['admin', 'doctor', 'receptionist'], 'Выберите корректную роль')
+    .required('Выбор роли обязателен'),
 });
 
 const initialValues = {

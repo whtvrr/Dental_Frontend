@@ -65,6 +65,9 @@ const ConditionModal = ({
       mesial: 'Медиальная поверхность',
       distal: 'Дистальная поверхность',
       lingual: 'Язычная поверхность',
+      cervical: 'Пришеечная область',
+      pulp: 'Пульпа',
+      jaw: 'Челюстная кость',
       gum_mesial: 'Десна медиальная',
       gum_distal: 'Десна дистальная',
       cusp: 'Бугор',
@@ -78,6 +81,23 @@ const ConditionModal = ({
       root_mesial: 'Медиальный корень',
       root_distal: 'Дистальный корень'
     };
+    
+    // Handle numbered roots and channels
+    if (surface.startsWith('root_')) {
+      const rootNumber = surface.split('_')[1];
+      return `Корень ${rootNumber}`;
+    }
+    
+    if (surface.startsWith('channel_')) {
+      const parts = surface.split('_');
+      if (parts.length >= 3) {
+        return `Канал ${parts[1]}-${parts[2]}`;
+      } else if (parts.length >= 2) {
+        return `Канал ${parts[1]}`;
+      }
+      return 'Канал';
+    }
+    
     return surfaceNames[surface] || surface;
   };
 

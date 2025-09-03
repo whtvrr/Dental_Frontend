@@ -40,6 +40,15 @@ const Topbar = () => {
         }
     };
 
+    const translateRole = (role) => {
+        switch(role) {
+            case 'admin': return 'Администратор';
+            case 'doctor': return 'Врач';
+            case 'receptionist': return 'Регистратор';
+            default: return role.charAt(0).toUpperCase() + role.slice(1);
+        }
+    };
+
     return (
     <Box display="flex" justifyContent="space-between" p={2}>
     {/* Search Bar */}
@@ -48,7 +57,7 @@ const Topbar = () => {
         backgroundColor={colors.primary[400]}
         borderRadius="3px"
         >
-          <InputBase sx = {{ml: 2, flex:1}} placeholder = "Search"/>
+          <InputBase sx = {{ml: 2, flex:1}} placeholder = "Поиск"/>
           <IconButton type = "button" sx = {{p:1}}>
             <SearchIcon/>
           </IconButton>
@@ -62,7 +71,7 @@ const Topbar = () => {
                     {user.fullName}
                 </Typography>
                 <Chip 
-                    label={user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                    label={translateRole(user.role)}
                     size="small"
                     sx={{
                         backgroundColor: getRoleColor(user.role),
@@ -109,7 +118,7 @@ const Topbar = () => {
         >
             <MenuItem onClick={handleLogout} sx={{ color: colors.grey[100] }}>
                 <LogoutIcon sx={{ mr: 1, fontSize: 18 }} />
-                <Typography variant="body2">Logout</Typography>
+                <Typography variant="body2">Выйти</Typography>
             </MenuItem>
         </Menu>
     </Box>
