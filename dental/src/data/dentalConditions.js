@@ -29,5 +29,12 @@ export const DENTAL_CONDITIONS = {
   absent: { label: 'Отсутствует', color: '#87ceeb' },
   filling: { label: 'Пломба', color: '#90caf9' },
   fillingComposite: { label: 'Композитная пломба', color: '#81c784' },
-  fillingAmalgam: { label: 'Амальгамная пломба', color: '#a5a5a5' }
+  fillingAmalgam: { label: 'Амальгамная пломба', color: '#a5a5a5' },
+  // Channel specific conditions
+  channelFilled: { label: 'Канал запломбирован', color: '#4caf50' },
+  channelPartial: { label: 'Канал частично обработан', color: '#ff9800' },
+  channelEmpty: { label: 'Канал пустой', color: '#f44336' },
+  channelNormal: { label: 'Канал в норме', color: '#2196f3' },
+  // Jaw condition
+  jaw: { label: 'Челюстная кость', color: '#fce4ec' }
 };

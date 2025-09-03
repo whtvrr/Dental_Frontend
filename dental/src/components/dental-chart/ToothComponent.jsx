@@ -17,11 +17,11 @@ const ToothComponent = ({
       display: 'flex', 
       flexDirection: 'column', 
       alignItems: 'center',
-      p: 0.5,
+      p: 1,
       borderRadius: 1,
       backgroundColor: isSelected ? (theme.palette.mode === 'dark' ? colors.blueAccent[800] : colors.blueAccent[100]) : 'transparent',
       transition: 'all 0.3s ease',
-      minWidth: 65,
+      minWidth: 130,
       position: 'relative'
     }}>
       <AnatomicalToothSVG
@@ -31,18 +31,6 @@ const ToothComponent = ({
         isSelected={isSelected}
       />
       
-      {/* Tooth number below diagram */}
-      <Typography 
-        variant="caption" 
-        sx={{ 
-          mt: 0.5, 
-          fontWeight: 600,
-          fontSize: '0.8rem',
-          color: theme.palette.mode === 'dark' ? colors.grey[100] : colors.grey[900]
-        }}
-      >
-        {number}
-      </Typography>
     </Box>
   );
 };
