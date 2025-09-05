@@ -2,6 +2,7 @@ import { Box, useTheme, CircularProgress, Alert, Chip } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import { useApi } from "../../hooks/useApi";
 import API_CONFIG from "../../config/api";
@@ -9,6 +10,7 @@ import API_CONFIG from "../../config/api";
 const Contacts = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate();
   const api = useApi();
   const [clientsData, setClientsData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -92,11 +94,15 @@ const Contacts = () => {
     fetchClients();
   }, [offset]);
 
+  const handleRowClick = (params) => {
+    navigate(`/clients/${params.id}`);
+  };
+
   return (
     <Box m="20px">
       <Header
-        title="MANAGE CLIENTS"
-        subtitle="List of Clients for Future Reference"
+        title="CLIENTS"
+        subtitle="Manage and view client information"
       />
       
       {error && (
@@ -146,7 +152,15 @@ const Contacts = () => {
             rows={clientsData}
             columns={columns}
             getRowId={(row) => row.id}
-            disableRowSelectionOnClick
+            onRowClick={handleRowClick}
+            sx={{
+              '& .MuiDataGrid-row': {
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: colors.primary[300] + '20',
+                },
+              },
+            }}
           />
         )}
       </Box>

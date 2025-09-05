@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -22,7 +22,6 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
 import { tokens } from "../../theme";
 import { buildApiUrl } from "../../config/api";
-import { AuthContext } from "../../context/AuthContext";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import EmailIcon from "@mui/icons-material/Email";
 import PersonIcon from "@mui/icons-material/Person";
@@ -36,7 +35,6 @@ const RegistrationForm = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const isNonMobile = useMediaQuery("(min-width:600px)");
-  const { login } = useContext(AuthContext);
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -58,20 +56,10 @@ const RegistrationForm = () => {
       const data = await response.json();
 
       if (response.status === 201 && data.data) {
-        // Handle new response format with tokens
-        const tokens = {
-          access_token: data.data.access_token,
-          refresh_token: data.data.refresh_token,
-          expires_in: data.data.expires_in,
-          token_type: data.data.token_type
-        };
-        
-        // Auto-login after successful registration
-        login(tokens);
-        
+        // User successfully created - do not auto-login to preserve current admin session
         setSubmitStatus({
           type: 'success',
-          message: 'Пользователь успешно зарегистрирован! Добро пожаловать в команду ШАНС!'
+          message: 'Пользователь успешно зарегистрирован! Новый сотрудник может теперь войти в систему.'
         });
         resetForm();
       } else if (response.status === 400) {

@@ -9,6 +9,7 @@ import DentalChartPage from "./scenes/dental-chart";
 import RegistrationForm from "./scenes/registration";
 import LoginPage from "./scenes/login";
 import FAQ from "./scenes/faq";
+import ClientDetail from "./scenes/client-detail";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import { AuthProvider } from "./context/AuthContext";
@@ -39,6 +40,7 @@ function App() {
                       <Route path="/" element={<Dashboard />} />
                       <Route path="/team" element={<Team />} />
                       <Route path="/contacts" element={<Contacts />} />
+                      <Route path="/clients/:id" element={<ClientDetail />} />
                       <Route path="/dental-chart" element={<DentalChartPage />} />
                       <Route path="/patients/:patientId/dental-chart" element={<DentalChartPage />} />
                       <Route path="/registration" element={<RegistrationForm />} />  

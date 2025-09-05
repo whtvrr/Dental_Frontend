@@ -19,9 +19,17 @@ const API_CONFIG = {
       PROFILE: '/users/profile',
       STAFF: '/users/staff',
       CLIENTS: '/users/clients',
+      DOCTORS: '/users/doctors',
+      DETAIL: '/users',
     },
     PATIENTS: {
       BASE: '/patients',
+    },
+    APPOINTMENTS: {
+      BASE: '/appointments',
+      DOCTOR: '/appointments/doctor',
+      CLIENT: '/appointments/client',
+      DETAIL: '/appointments',
     }
   }
 };
