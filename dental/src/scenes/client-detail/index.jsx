@@ -26,6 +26,7 @@ import { tokens } from '../../theme';
 import Header from '../../components/Header';
 import { useApi } from '../../hooks/useApi';
 import API_CONFIG from '../../config/api';
+import AppointmentsModal from '../../components/AppointmentsModal';
 
 const ClientDetail = () => {
   const theme = useTheme();
@@ -39,6 +40,7 @@ const ClientDetail = () => {
   const [error, setError] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+  const [showAppointmentsModal, setShowAppointmentsModal] = useState(false);
 
   const fetchClientDetails = async () => {
     setLoading(true);
@@ -113,11 +115,11 @@ const ClientDetail = () => {
         if (data.status === 200 && data.data && data.data.appointments) {
           setAppointments(data.data.appointments);
           console.log('Client appointments:', data.data.appointments);
-          // TODO: Show appointments in a modal or navigate to appointments view
         } else {
           console.log('No appointments found for this client');
           setAppointments([]);
         }
+        setShowAppointmentsModal(true);
       } else {
         console.error('Failed to fetch appointments');
       }
@@ -368,6 +370,14 @@ const ClientDetail = () => {
           </Card>
         </Grid>
       </Grid>
+
+      {/* Appointments Modal */}
+      <AppointmentsModal
+        open={showAppointmentsModal}
+        onClose={() => setShowAppointmentsModal(false)}
+        appointments={appointments}
+        clientName={client?.full_name || 'Unknown Client'}
+      />
     </Box>
   );
 };
