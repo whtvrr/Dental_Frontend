@@ -8,20 +8,16 @@ import {
   Button,
   Typography,
   Box,
-  TextField,
-  Collapse,
   Grid,
   Paper,
   useTheme
 } from '@mui/material';
 import {
-  Add as AddIcon,
-  ExpandLess,
-  ExpandMore
+  Settings as SettingsIcon
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { tokens } from '../../theme';
-import { DENTAL_CONDITIONS } from '../../data/dentalConditions';
-import ColorPicker from './ColorPicker';
+import { useStatuses } from '../../hooks/useStatuses';
 
 const ConditionModal = ({ 
   open, 
@@ -32,28 +28,12 @@ const ConditionModal = ({
 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newCondition, setNewCondition] = useState({
-    name: '',
-    shortName: '',
-    color: '#ffffff'
-  });
+  const { statusesMap, loading: statusesLoading } = useStatuses();
+  const navigate = useNavigate();
 
-  const handleAddCondition = () => {
-    if (newCondition.name && newCondition.color) {
-      const conditionKey = newCondition.shortName || 
-        newCondition.name.toLowerCase().replace(/\s+/g, '_');
-      
-      // In a real app, this would make an API call
-      DENTAL_CONDITIONS[conditionKey] = {
-        label: newCondition.name,
-        color: newCondition.color
-      };
-      
-      onSelect(conditionKey);
-      setNewCondition({ name: '', shortName: '', color: '#ffffff' });
-      setShowAddForm(false);
-    }
+  const handleManageStatuses = () => {
+    onClose(); // Close the modal first
+    navigate('/statuses'); // Navigate to statuses management page
   };
 
   const formatSurfaceName = (surface) => {
@@ -130,171 +110,96 @@ const ConditionModal = ({
       </DialogTitle>
       
       <DialogContent sx={{ p: 3 }}>
-        <Grid container spacing={2}>
-          {Object.entries(DENTAL_CONDITIONS).map(([key, condition]) => (
-            <Grid item xs={12} sm={6} md={4} key={key}>
-              <Paper
-                elevation={2}
-                sx={{
-                  p: 2,
-                  cursor: 'pointer',
-                  backgroundColor: colors.primary[500],
-                  border: `1px solid ${colors.grey[600]}`,
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    backgroundColor: colors.primary[600],
-                    transform: 'translateY(-2px)',
-                    boxShadow: `0 4px 12px ${colors.grey[800]}`
-                  }
-                }}
-                onClick={() => onSelect(key)}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box
-                    sx={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: '50%',
-                      backgroundColor: condition.color,
-                      border: `2px solid ${colors.grey[500]}`,
-                      flexShrink: 0
-                    }}
-                  />
-                  <Typography 
-                    variant="body2" 
-                    color={colors.grey[100]}
-                    sx={{ fontWeight: 500 }}
-                  >
-                    {condition.label}
-                  </Typography>
-                </Box>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
+        {statusesLoading ? (
+          <Box display="flex" justifyContent="center" p={4}>
+            <Typography color={colors.grey[100]}>Загрузка статусов...</Typography>
+          </Box>
+        ) : (
+          <Grid container spacing={2}>
+            {Object.entries(statusesMap).map(([key, condition]) => (
+              <Grid item xs={12} sm={6} md={4} key={key}>
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    cursor: 'pointer',
+                    backgroundColor: colors.primary[500],
+                    border: `1px solid ${colors.grey[600]}`,
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      backgroundColor: colors.primary[600],
+                      transform: 'translateY(-2px)',
+                      boxShadow: `0 4px 12px ${colors.grey[800]}`
+                    }
+                  }}
+                  onClick={() => onSelect(key)}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Box
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        backgroundColor: condition.color,
+                        border: `2px solid ${colors.grey[500]}`,
+                        flexShrink: 0
+                      }}
+                    />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography 
+                        variant="body2" 
+                        color={colors.grey[100]}
+                        sx={{ fontWeight: 500 }}
+                      >
+                        {condition.label}
+                      </Typography>
+                      {condition.type && condition.type !== 'normal' && (
+                        <Typography 
+                          variant="caption" 
+                          color={colors.grey[300]}
+                          sx={{ display: 'block' }}
+                        >
+                          {condition.type === 'diagnosis' ? 'Диагноз' : 
+                           condition.type === 'treatment' ? 'Лечение' : condition.type}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        )}
 
-        {/* Add New Condition Section */}
-        <Box sx={{ mt: 4 }}>
+        {/* Manage Statuses Section */}
+        <Box sx={{ mt: 4, textAlign: 'center' }}>
           <Button
-            startIcon={showAddForm ? <ExpandLess /> : <ExpandMore />}
-            onClick={() => setShowAddForm(!showAddForm)}
+            variant="outlined"
+            startIcon={<SettingsIcon />}
+            onClick={handleManageStatuses}
             sx={{ 
-              color: colors.greenAccent[400],
+              color: colors.blueAccent[400],
+              borderColor: colors.blueAccent[400],
               textTransform: 'none',
               fontSize: '1rem',
-              fontWeight: 600
+              fontWeight: 600,
+              px: 3,
+              py: 1.5,
+              '&:hover': {
+                backgroundColor: colors.blueAccent[400] + '20',
+                borderColor: colors.blueAccent[300],
+              }
             }}
           >
-            Добавить новое состояние
+            Управление статусами
           </Button>
-          
-          <Collapse in={showAddForm}>
-            <Paper sx={{ 
-              mt: 2, 
-              p: 3, 
-              backgroundColor: colors.primary[500],
-              border: `1px solid ${colors.grey[600]}`
-            }}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    label="Название"
-                    value={newCondition.name}
-                    onChange={(e) => setNewCondition(prev => ({ 
-                      ...prev, 
-                      name: e.target.value 
-                    }))}
-                    sx={{
-                      '& .MuiInputBase-input': {
-                        color: colors.grey[100]
-                      },
-                      '& .MuiInputLabel-root': {
-                        color: colors.grey[300]
-                      },
-                      '& .MuiOutlinedInput-root': {
-                        '& fieldset': {
-                          borderColor: colors.grey[600]
-                        },
-                        '&:hover fieldset': {
-                          borderColor: colors.grey[500]
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: colors.blueAccent[400]
-                        }
-                      }
-                    }}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} md={4}>
-                  <TextField
-                    fullWidth
-                    label="Короткое название"
-                    value={newCondition.shortName}
-                    onChange={(e) => setNewCondition(prev => ({ 
-                      ...prev, 
-                      shortName: e.target.value 
-                    }))}
-                    sx={{
-                      '& .MuiInputBase-input': {
-                        color: colors.grey[100]
-                      },
-                      '& .MuiInputLabel-root': {
-                        color: colors.grey[300]
-                      },
-                      '& .MuiOutlinedInput-root': {
-                        '& fieldset': {
-                          borderColor: colors.grey[600]
-                        },
-                        '&:hover fieldset': {
-                          borderColor: colors.grey[500]
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: colors.blueAccent[400]
-                        }
-                      }
-                    }}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} md={4}>
-                  <Typography variant="subtitle2" color={colors.grey[300]} sx={{ mb: 1 }}>
-                    Цвет
-                  </Typography>
-                  <ColorPicker
-                    value={newCondition.color}
-                    onChange={(color) => setNewCondition(prev => ({ 
-                      ...prev, 
-                      color 
-                    }))}
-                  />
-                </Grid>
-                
-                <Grid item xs={12}>
-                  <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={handleAddCondition}
-                    disabled={!newCondition.name || !newCondition.color}
-                    sx={{
-                      backgroundColor: colors.greenAccent[600],
-                      color: colors.grey[100],
-                      '&:hover': {
-                        backgroundColor: colors.greenAccent[700]
-                      },
-                      '&:disabled': {
-                        backgroundColor: colors.grey[700],
-                        color: colors.grey[500]
-                      }
-                    }}
-                  >
-                    Сохранить
-                  </Button>
-                </Grid>
-              </Grid>
-            </Paper>
-          </Collapse>
+          <Typography 
+            variant="body2" 
+            color={colors.grey[300]} 
+            sx={{ mt: 1, fontSize: '0.875rem' }}
+          >
+            Добавить, изменить или удалить статусы зубов
+          </Typography>
         </Box>
       </DialogContent>
       

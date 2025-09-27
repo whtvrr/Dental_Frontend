@@ -3,8 +3,9 @@ import { Box, Typography, Paper, useTheme } from '@mui/material';
 import { tokens } from '../../theme';
 import ToothComponent from './ToothComponent';
 import ConditionModal from './ConditionModal';
-import { TOOTH_NUMBERS, DENTAL_CONDITIONS } from '../../data/dentalConditions';
+import { TOOTH_NUMBERS } from '../../data/dentalConditions';
 import { useDentalChart } from '../../hooks/useDentalChart';
+import { useStatuses } from '../../hooks/useStatuses';
 
 const DentalChart = ({ patientId }) => {
   const theme = useTheme();
@@ -14,6 +15,7 @@ const DentalChart = ({ patientId }) => {
   const [modalOpen, setModalOpen] = useState(false);
   
   const { toothConditions, updateToothCondition, loading } = useDentalChart(patientId);
+  const { statusesMap, loading: statusesLoading } = useStatuses();
 
   const handleToothSurfaceClick = useCallback((toothNumber, surface = 'crown') => {
     setSelectedTooth(toothNumber);
@@ -105,6 +107,7 @@ const DentalChart = ({ patientId }) => {
                   conditions={toothConditions[number] || {}}
                   onSurfaceClick={handleToothSurfaceClick}
                   isSelected={selectedTooth === number}
+                  statusesMap={statusesMap}
                 />
               ))}
             </Box>
@@ -146,6 +149,7 @@ const DentalChart = ({ patientId }) => {
                   conditions={toothConditions[number] || {}}
                   onSurfaceClick={handleToothSurfaceClick}
                   isSelected={selectedTooth === number}
+                  statusesMap={statusesMap}
                 />
               ))}
             </Box>

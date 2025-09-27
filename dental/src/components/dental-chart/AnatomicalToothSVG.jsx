@@ -1,13 +1,13 @@
 import React from 'react';
 import { Box, useTheme } from '@mui/material';
 import { tokens } from '../../theme';
-import { DENTAL_CONDITIONS } from '../../data/dentalConditions';
 
 const AnatomicalToothSVG = ({ 
   number, 
   conditions = {}, 
   onSurfaceClick, 
-  isSelected 
+  isSelected,
+  statusesMap = {}
 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -19,7 +19,15 @@ const AnatomicalToothSVG = ({
       if (surface === 'jaw') return theme.palette.mode === 'dark' ? '#4a2c2a' : '#f8e6e0';
       return '#ffffff'; // Completely white for ALL other surfaces (crowns, roots, channels, circles)
     }
-    return DENTAL_CONDITIONS[condition]?.color || '#ffffff';
+    
+    // Try to get color from real statuses first
+    const statusInfo = statusesMap[condition];
+    if (statusInfo) {
+      return statusInfo.color;
+    }
+    
+    // Fallback to white if status not found
+    return '#ffffff';
   };
 
   const getToothType = (num) => {

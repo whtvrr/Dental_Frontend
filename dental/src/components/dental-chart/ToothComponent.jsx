@@ -7,7 +7,8 @@ const ToothComponent = ({
   number, 
   conditions = {}, 
   onSurfaceClick, 
-  isSelected 
+  isSelected,
+  statusesMap = {}
 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -29,6 +30,7 @@ const ToothComponent = ({
         conditions={conditions}
         onSurfaceClick={onSurfaceClick}
         isSelected={isSelected}
+        statusesMap={statusesMap}
       />
       
     </Box>

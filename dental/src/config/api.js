@@ -30,6 +30,15 @@ const API_CONFIG = {
       DOCTOR: '/appointments/doctor',
       CLIENT: '/appointments/client',
       DETAIL: '/appointments',
+    },
+    COMPLAINTS: {
+      BASE: '/complaints',
+    },
+    STATUSES: {
+      BASE: '/statuses',
+      DIAGNOSIS: '/statuses/diagnosis',
+      TREATMENT: '/statuses/treatment',
+      BY_TYPE: '/statuses/type',
     }
   }
 };

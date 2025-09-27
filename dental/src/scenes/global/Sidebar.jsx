@@ -15,6 +15,8 @@ import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 // import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined";
+import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 // import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
@@ -143,6 +145,20 @@ const Sidebar = () => {
               title="Клиенты"
               to="/contacts"
               icon={<ContactsOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+              title="Жалобы"
+              to="/complaints"
+              icon={<ReportProblemOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+              title="Статусы"
+              to="/statuses"
+              icon={<AssignmentTurnedInOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
