@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Box, Typography, Paper, useTheme } from '@mui/material';
 import { tokens } from '../../theme';
 import ToothComponent from './ToothComponent';
@@ -7,15 +7,23 @@ import { TOOTH_NUMBERS } from '../../data/dentalConditions';
 import { useDentalChart } from '../../hooks/useDentalChart';
 import { useStatuses } from '../../hooks/useStatuses';
 
-const DentalChart = ({ patientId }) => {
+const DentalChart = ({ patientId, onFormulaChange }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [selectedTooth, setSelectedTooth] = useState(null);
   const [selectedSurface, setSelectedSurface] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  
-  const { toothConditions, updateToothCondition, loading } = useDentalChart(patientId);
+
+  const { toothConditions, updateToothCondition, loading, getFormulaData } = useDentalChart(patientId);
   const { statusesMap, loading: statusesLoading } = useStatuses();
+
+  // Notify parent component when formula data changes
+  useEffect(() => {
+    if (onFormulaChange) {
+      const formulaData = getFormulaData();
+      onFormulaChange(formulaData);
+    }
+  }, [toothConditions, getFormulaData, onFormulaChange]);
 
   const handleToothSurfaceClick = useCallback((toothNumber, surface = 'crown') => {
     setSelectedTooth(toothNumber);
@@ -25,12 +33,12 @@ const DentalChart = ({ patientId }) => {
 
   const handleConditionSelect = useCallback(async (condition) => {
     if (selectedTooth && selectedSurface) {
-      await updateToothCondition(selectedTooth, selectedSurface, condition);
+      await updateToothCondition(selectedTooth, selectedSurface, condition, statusesMap);
       setModalOpen(false);
       setSelectedTooth(null);
       setSelectedSurface(null);
     }
-  }, [selectedTooth, selectedSurface, updateToothCondition]);
+  }, [selectedTooth, selectedSurface, updateToothCondition, statusesMap]);
 
   const handleModalClose = useCallback(() => {
     setModalOpen(false);

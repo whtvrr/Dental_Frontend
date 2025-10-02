@@ -29,6 +29,8 @@ import {
   DialogContent,
   DialogActions,
   DialogContentText,
+  Switch,
+  FormControlLabel,
 } from "@mui/material";
 import { buildApiUrl } from "../../config/api";
 import API_CONFIG from "../../config/api";
@@ -37,6 +39,7 @@ import Header from "../../components/Header";
 import { tokens } from "../../theme";
 import { AuthContext } from "../../context/AuthContext";
 import ApiClient from "../../utils/apiClient";
+import DentalChart from "../../components/dental-chart/DentalChart";
 
 const Calendar = () => {
   const theme = useTheme();
@@ -77,6 +80,9 @@ const Calendar = () => {
     diagnosis_id: '',
     treatment_id: ''
   });
+  const [useCustomComplaint, setUseCustomComplaint] = useState(false);
+  const [formulaModalOpen, setFormulaModalOpen] = useState(false);
+  const [formulaData, setFormulaData] = useState(null);
   const [clients, setClients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -431,6 +437,8 @@ const Calendar = () => {
       diagnosis_id: '',
       treatment_id: ''
     });
+    setUseCustomComplaint(false);
+    setFormulaData(null);
   };
 
   const fetchComplaintsAndStatuses = async () => {
@@ -490,7 +498,7 @@ const Calendar = () => {
         custom_complaint: completeFormData.custom_complaint || null,
         diagnosis_id: completeFormData.diagnosis_id || null,
         treatment_id: completeFormData.treatment_id || null,
-        formula: null // Skip formula for now as requested
+        formula: formulaData || null
       };
 
       const response = await apiClient.post(`${API_CONFIG.ENDPOINTS.APPOINTMENTS.BASE}/${selectedAppointment.id}/complete`, completeData);
@@ -519,6 +527,8 @@ const Calendar = () => {
             diagnosis_id: '',
             treatment_id: ''
           });
+          setUseCustomComplaint(false);
+          setFormulaData(null);
         } else {
           console.error('Failed to complete appointment:', data.message);
           setError(data.message || 'Failed to complete appointment');
@@ -1671,246 +1681,216 @@ const Calendar = () => {
               </Typography>
             </Box>
           ) : (
-            <Grid container spacing={3}>
-              {/* Anamnesis */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Anamnesis"
-                  multiline
-                  rows={3}
-                  value={completeFormData.anamnesis}
-                  onChange={(e) => handleCompleteFormChange('anamnesis', e.target.value)}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {/* Anamnesis - Full width at top */}
+              <TextField
+                fullWidth
+                label="Anamnesis"
+                multiline
+                rows={3}
+                value={completeFormData.anamnesis}
+                onChange={(e) => handleCompleteFormChange('anamnesis', e.target.value)}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    color: colors.grey[100],
+                    '& fieldset': {
+                      borderColor: colors.grey[300],
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: colors.grey[100],
+                  },
+                }}
+              />
+
+              {/* Complaint Section with Toggle */}
+              <Box>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={useCustomComplaint}
+                      onChange={(e) => {
+                        setUseCustomComplaint(e.target.checked);
+                        // Clear the other complaint field when switching
+                        if (e.target.checked) {
+                          handleCompleteFormChange('complaint_id', '');
+                        } else {
+                          handleCompleteFormChange('custom_complaint', '');
+                        }
+                      }}
+                      sx={{
+                        '& .MuiSwitch-switchBase.Mui-checked': {
+                          color: colors.greenAccent[600],
+                        },
+                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                          backgroundColor: colors.greenAccent[600],
+                        },
+                      }}
+                    />
+                  }
+                  label="Use custom complaint"
                   sx={{
-                    '& .MuiOutlinedInput-root': {
-                      color: colors.grey[100],
-                      '& fieldset': {
-                        borderColor: colors.grey[300],
-                      },
-                    },
-                    '& .MuiInputLabel-root': {
+                    '& .MuiFormControlLabel-label': {
                       color: colors.grey[100],
                     },
+                    mb: 2,
                   }}
                 />
-              </Grid>
+
+                {/* Complaint Input - Full width below toggle */}
+                {!useCustomComplaint ? (
+                  <FormControl fullWidth>
+                    <Select
+                      value={completeFormData.complaint_id}
+                      onChange={(e) => handleCompleteFormChange('complaint_id', e.target.value)}
+                      label="Select Complaint"
+                      displayEmpty
+                      fullWidth
+                      sx={{
+                        color: colors.grey[100],
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: colors.grey[300],
+                        },
+                        '& .MuiSvgIcon-root': {
+                          color: colors.grey[100],
+                        },
+                      }}
+                    >
+                      <MenuItem value="">
+                        <em>No complaint selected</em>
+                      </MenuItem>
+                      {complaints.map((complaint) => (
+                        <MenuItem key={complaint.id} value={complaint.id}>
+                          {complaint.title}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                ) : (
+                  <TextField
+                    fullWidth
+                    label="Custom Complaint"
+                    multiline
+                    rows={3}
+                    value={completeFormData.custom_complaint}
+                    onChange={(e) => handleCompleteFormChange('custom_complaint', e.target.value)}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        color: colors.grey[100],
+                        '& fieldset': {
+                          borderColor: colors.grey[300],
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: colors.grey[100],
+                      },
+                    }}
+                  />
+                )}
+              </Box>
+
+              {/* Diagnosis and Treatment - Side by side */}
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Box sx={{ flex: 1, minWidth: '200px' }}>
+                  <FormControl fullWidth>
+                    <Select
+                      value={completeFormData.diagnosis_id}
+                      onChange={(e) => handleCompleteFormChange('diagnosis_id', e.target.value)}
+                      label="Diagnosis Status"
+                      displayEmpty
+                      fullWidth
+                      sx={{
+                        color: colors.grey[100],
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: colors.grey[300],
+                        },
+                        '& .MuiSvgIcon-root': {
+                          color: colors.grey[100],
+                        },
+                      }}
+                    >
+                      <MenuItem value="">
+                        <em>No diagnosis selected</em>
+                      </MenuItem>
+                      {diagnosisStatuses.map((status) => (
+                        <MenuItem key={status.id} value={status.id}>
+                          {status.title} ({status.code})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+
+                <Box sx={{ flex: 1, minWidth: '200px' }}>
+                  <FormControl fullWidth>
+                    <Select
+                      value={completeFormData.treatment_id}
+                      onChange={(e) => handleCompleteFormChange('treatment_id', e.target.value)}
+                      label="Treatment Status"
+                      displayEmpty
+                      fullWidth
+                      sx={{
+                        color: colors.grey[100],
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: colors.grey[300],
+                        },
+                        '& .MuiSvgIcon-root': {
+                          color: colors.grey[100],
+                        },
+                      }}
+                    >
+                      <MenuItem value="">
+                        <em>No treatment selected</em>
+                      </MenuItem>
+                      {treatmentStatuses.map((status) => (
+                        <MenuItem key={status.id} value={status.id}>
+                          {status.title} ({status.code})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+              </Box>
 
               {/* Comment */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Comment"
-                  multiline
-                  rows={3}
-                  value={completeFormData.comment}
-                  onChange={(e) => handleCompleteFormChange('comment', e.target.value)}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      color: colors.grey[100],
-                      '& fieldset': {
-                        borderColor: colors.grey[300],
-                      },
+              <TextField
+                fullWidth
+                label="Comments"
+                multiline
+                rows={3}
+                value={completeFormData.comment}
+                onChange={(e) => handleCompleteFormChange('comment', e.target.value)}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    color: colors.grey[100],
+                    '& fieldset': {
+                      borderColor: colors.grey[300],
                     },
-                    '& .MuiInputLabel-root': {
-                      color: colors.grey[100],
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: colors.grey[100],
+                  },
+                }}
+              />
+
+              {/* Edit Formula Button - Last element */}
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Button
+                  variant="outlined"
+                  onClick={() => setFormulaModalOpen(true)}
+                  sx={{
+                    color: colors.blueAccent[400],
+                    borderColor: colors.blueAccent[400],
+                    "&:hover": {
+                      borderColor: colors.blueAccent[300],
+                      backgroundColor: colors.blueAccent[900],
                     },
                   }}
-                />
-              </Grid>
-
-              {/* Complaint Selection */}
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth sx={{ minWidth: '200px' }}>
-                  <InputLabel 
-                    shrink={false}
-                    sx={{ 
-                      color: colors.grey[100],
-                      fontSize: '1rem',
-                      "&.Mui-focused": {
-                        color: colors.grey[100]
-                      }
-                    }}
-                  >
-                    Select Complaint
-                  </InputLabel>
-                  <Select
-                    value={completeFormData.complaint_id}
-                    onChange={(e) => handleCompleteFormChange('complaint_id', e.target.value)}
-                    label="Select Complaint"
-                    fullWidth
-                    sx={{
-                      color: colors.grey[100],
-                      minWidth: '200px',
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: colors.grey[300],
-                      },
-                      '& .MuiSvgIcon-root': {
-                        color: colors.grey[100],
-                      },
-                    }}
-                  >
-                    <MenuItem value="">
-                      <em>No complaint selected</em>
-                    </MenuItem>
-                    {complaints.map((complaint) => (
-                      <MenuItem key={complaint.id} value={complaint.id}>
-                        <Box>
-                          <Typography variant="body1" fontWeight="bold">
-                            {complaint.title}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            {complaint.description}
-                          </Typography>
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              {/* Custom Complaint */}
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Custom Complaint"
-                  value={completeFormData.custom_complaint}
-                  onChange={(e) => handleCompleteFormChange('custom_complaint', e.target.value)}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      color: colors.grey[100],
-                      '& fieldset': {
-                        borderColor: colors.grey[300],
-                      },
-                    },
-                    '& .MuiInputLabel-root': {
-                      color: colors.grey[100],
-                    },
-                  }}
-                />
-              </Grid>
-
-              {/* Diagnosis Status */}
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth sx={{ minWidth: '200px' }}>
-                  <InputLabel 
-                    shrink={false}
-                    sx={{ 
-                      color: colors.grey[100],
-                      fontSize: '1rem',
-                      "&.Mui-focused": {
-                        color: colors.grey[100]
-                      }
-                    }}
-                  >
-                    Diagnosis Status
-                  </InputLabel>
-                  <Select
-                    value={completeFormData.diagnosis_id}
-                    onChange={(e) => handleCompleteFormChange('diagnosis_id', e.target.value)}
-                    label="Diagnosis Status"
-                    fullWidth
-                    sx={{
-                      color: colors.grey[100],
-                      minWidth: '200px',
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: colors.grey[300],
-                      },
-                      '& .MuiSvgIcon-root': {
-                        color: colors.grey[100],
-                      },
-                    }}
-                  >
-                    <MenuItem value="">
-                      <em>No diagnosis selected</em>
-                    </MenuItem>
-                    {diagnosisStatuses.map((status) => (
-                      <MenuItem key={status.id} value={status.id}>
-                        <Box display="flex" alignItems="center" gap={1}>
-                          <Box
-                            sx={{
-                              width: 12,
-                              height: 12,
-                              borderRadius: '50%',
-                              backgroundColor: status.color,
-                              border: `1px solid ${colors.grey[500]}`
-                            }}
-                          />
-                          <Box>
-                            <Typography variant="body1" fontWeight="bold">
-                              {status.title} ({status.code})
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary">
-                              {status.description}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              {/* Treatment Status */}
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth sx={{ minWidth: '200px' }}>
-                  <InputLabel 
-                    shrink={false}
-                    sx={{ 
-                      color: colors.grey[100],
-                      fontSize: '1rem',
-                      "&.Mui-focused": {
-                        color: colors.grey[100]
-                      }
-                    }}
-                  >
-                    Treatment Status
-                  </InputLabel>
-                  <Select
-                    value={completeFormData.treatment_id}
-                    onChange={(e) => handleCompleteFormChange('treatment_id', e.target.value)}
-                    label="Treatment Status"
-                    fullWidth
-                    sx={{
-                      color: colors.grey[100],
-                      minWidth: '200px',
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: colors.grey[300],
-                      },
-                      '& .MuiSvgIcon-root': {
-                        color: colors.grey[100],
-                      },
-                    }}
-                  >
-                    <MenuItem value="">
-                      <em>No treatment selected</em>
-                    </MenuItem>
-                    {treatmentStatuses.map((status) => (
-                      <MenuItem key={status.id} value={status.id}>
-                        <Box display="flex" alignItems="center" gap={1}>
-                          <Box
-                            sx={{
-                              width: 12,
-                              height: 12,
-                              borderRadius: '50%',
-                              backgroundColor: status.color,
-                              border: `1px solid ${colors.grey[500]}`
-                            }}
-                          />
-                          <Box>
-                            <Typography variant="body1" fontWeight="bold">
-                              {status.title} ({status.code})
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary">
-                              {status.description}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
+                >
+                  Edit Formula
+                </Button>
+              </Box>
+            </Box>
           )}
         </DialogContent>
 
@@ -1954,6 +1934,59 @@ const Calendar = () => {
             ) : (
               'Complete Appointment'
             )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dental Formula Modal */}
+      <Dialog
+        open={formulaModalOpen}
+        onClose={() => setFormulaModalOpen(false)}
+        maxWidth="xl"
+        fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: colors.primary[400],
+            border: `1px solid ${colors.grey[600]}`,
+            maxHeight: '95vh',
+            height: '95vh'
+          }
+        }}
+      >
+        <DialogTitle sx={{ color: colors.grey[100] }}>
+          Dental Chart
+          {selectedAppointment && selectedClient && (
+            <Typography variant="subtitle1" color={colors.grey[300]} sx={{ mt: 1 }}>
+              Dental formula for {selectedClient.full_name}
+            </Typography>
+          )}
+        </DialogTitle>
+
+        <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
+          <Box sx={{ height: '100%', overflow: 'auto' }}>
+            {selectedAppointment && selectedClient && (
+              <DentalChart
+                patientId={selectedClient.id}
+                onFormulaChange={(data) => setFormulaData(data)}
+              />
+            )}
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 3 }}>
+          <Button
+            onClick={() => setFormulaModalOpen(false)}
+            variant="outlined"
+            sx={{
+              color: colors.grey[100],
+              borderColor: colors.grey[400],
+              "&:hover": {
+                borderColor: colors.grey[100],
+                backgroundColor: colors.grey[900],
+              },
+            }}
+          >
+            Close
           </Button>
         </DialogActions>
       </Dialog>

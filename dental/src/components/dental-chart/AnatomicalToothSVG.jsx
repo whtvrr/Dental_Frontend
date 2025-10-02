@@ -349,16 +349,16 @@ const AnatomicalToothSVG = ({
           })
         )}
         
-        {/* Large tooth number */}
+        {/* Large tooth number - increased size for better visibility */}
         <text
           x={centerX}
-          y={20}
+          y={18}
           textAnchor="middle"
-          fontSize="24"
+          fontSize="32"
           fontWeight="bold"
           fill={theme.palette.mode === 'dark' ? '#ffffff' : '#000000'}
           stroke={theme.palette.mode === 'dark' ? '#000000' : '#ffffff'}
-          strokeWidth="0.8"
+          strokeWidth="1.2"
           pointerEvents="none"
         >
           {number}
