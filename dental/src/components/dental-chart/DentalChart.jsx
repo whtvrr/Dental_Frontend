@@ -5,17 +5,34 @@ import ToothComponent from './ToothComponent';
 import ConditionModal from './ConditionModal';
 import { TOOTH_NUMBERS } from '../../data/dentalConditions';
 import { useDentalChart } from '../../hooks/useDentalChart';
-import { useStatuses } from '../../hooks/useStatuses';
+import { useStatusContext } from '../../context/StatusContext';
 
-const DentalChart = ({ patientId, onFormulaChange }) => {
+const DentalChart = ({
+  patientId,
+  onFormulaChange,
+  toothConditions: externalToothConditions,
+  readOnly = false
+}) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [selectedTooth, setSelectedTooth] = useState(null);
   const [selectedSurface, setSelectedSurface] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const { toothConditions, updateToothCondition, loading, getFormulaData } = useDentalChart(patientId);
-  const { statusesMap, loading: statusesLoading } = useStatuses();
+  const { toothConditions: internalToothConditions, updateToothCondition, loading, getFormulaData } = useDentalChart(patientId);
+  const { statusesMap, statusesLookup, loading: statusesLoading } = useStatusContext();
+
+  // Use external conditions if provided, otherwise use internal hook
+  const toothConditions = externalToothConditions || internalToothConditions;
+
+  // Debug logging
+  useEffect(() => {
+    if (Object.keys(toothConditions).length > 0 && Object.keys(statusesMap).length > 0) {
+      console.log('DentalChart - Rendering with:');
+      console.log('Tooth conditions:', toothConditions);
+      console.log('Available statuses:', statusesMap);
+    }
+  }, [toothConditions, statusesMap]);
 
   // Notify parent component when formula data changes
   useEffect(() => {
@@ -26,10 +43,12 @@ const DentalChart = ({ patientId, onFormulaChange }) => {
   }, [toothConditions, getFormulaData, onFormulaChange]);
 
   const handleToothSurfaceClick = useCallback((toothNumber, surface = 'crown') => {
+    if (readOnly) return; // Disable interaction in readonly mode
+
     setSelectedTooth(toothNumber);
     setSelectedSurface(surface);
     setModalOpen(true);
-  }, []);
+  }, [readOnly]);
 
   const handleConditionSelect = useCallback(async (condition) => {
     if (selectedTooth && selectedSurface) {
@@ -115,7 +134,8 @@ const DentalChart = ({ patientId, onFormulaChange }) => {
                   conditions={toothConditions[number] || {}}
                   onSurfaceClick={handleToothSurfaceClick}
                   isSelected={selectedTooth === number}
-                  statusesMap={statusesMap}
+                  statusesMap={statusesLookup}
+                  readOnly={readOnly}
                 />
               ))}
             </Box>
@@ -157,7 +177,8 @@ const DentalChart = ({ patientId, onFormulaChange }) => {
                   conditions={toothConditions[number] || {}}
                   onSurfaceClick={handleToothSurfaceClick}
                   isSelected={selectedTooth === number}
-                  statusesMap={statusesMap}
+                  statusesMap={statusesLookup}
+                  readOnly={readOnly}
                 />
               ))}
             </Box>
@@ -165,13 +186,17 @@ const DentalChart = ({ patientId, onFormulaChange }) => {
         </Box>
       </Paper>
 
-      <ConditionModal
-        open={modalOpen}
-        onClose={handleModalClose}
-        onSelect={handleConditionSelect}
-        selectedTooth={selectedTooth}
-        selectedSurface={selectedSurface}
-      />
+      {!readOnly && (
+        <ConditionModal
+          open={modalOpen}
+          onClose={handleModalClose}
+          onSelect={handleConditionSelect}
+          selectedTooth={selectedTooth}
+          selectedSurface={selectedSurface}
+          statusesMap={statusesMap}
+          statusesLoading={statusesLoading}
+        />
+      )}
     </Box>
   );
 };

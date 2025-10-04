@@ -2,32 +2,40 @@ import React from 'react';
 import { Box, useTheme } from '@mui/material';
 import { tokens } from '../../theme';
 
-const AnatomicalToothSVG = ({ 
-  number, 
-  conditions = {}, 
-  onSurfaceClick, 
+const AnatomicalToothSVG = ({
+  number,
+  conditions = {},
+  onSurfaceClick,
   isSelected,
-  statusesMap = {}
+  statusesMap = {},
+  readOnly = false
 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   
   const getConditionColor = (surface) => {
     const condition = conditions[surface];
+
+    // Debug logging to help troubleshoot
+    if (condition) {
+      console.log(`Surface ${surface}: condition=${condition}, statusInfo=`, statusesMap[condition]);
+    }
+
     if (!condition || condition === 'normal') {
       // All surfaces start completely blank/white except jaw which has natural gum color
       if (surface === 'jaw') return theme.palette.mode === 'dark' ? '#4a2c2a' : '#f8e6e0';
       return '#ffffff'; // Completely white for ALL other surfaces (crowns, roots, channels, circles)
     }
-    
+
     // Try to get color from real statuses first
     const statusInfo = statusesMap[condition];
-    if (statusInfo) {
+    if (statusInfo && statusInfo.color) {
       return statusInfo.color;
     }
-    
-    // Fallback to white if status not found
-    return '#ffffff';
+
+    // Fallback to a distinct color if status not found to help debug
+    console.warn(`Status not found for condition: ${condition} on surface: ${surface}`);
+    return '#ff0000'; // Red to indicate missing status
   };
 
   const getToothType = (num) => {
@@ -46,7 +54,7 @@ const AnatomicalToothSVG = ({
   const baseProps = {
     stroke: strokeColor,
     strokeWidth: '0.8',
-    style: { cursor: 'pointer' }
+    style: { cursor: readOnly ? 'default' : 'pointer' }
   };
 
   const svgStyles = {
@@ -137,7 +145,7 @@ const AnatomicalToothSVG = ({
         jawWidth = 90;
         crownPath = `M${centerX-35} 30 Q${centerX-35} 15 ${centerX} 15 Q${centerX+35} 15 ${centerX+35} 30 L${centerX+35} ${jawY} Q${centerX+35} ${jawY+5} ${centerX} ${jawY+5} Q${centerX-35} ${jawY+5} ${centerX-35} ${jawY} Z`;
         rootPaths = [{
-          path: `M${centerX-15} ${jawY+5} L${centerX-15} ${jawY+jawHeight+40} Q${centerX} ${jawY+jawHeight+45} ${centerX+15} ${jawY+jawHeight+40} L${centerX+15} ${jawY+5}`,
+          path: `M${centerX-25} ${jawY+5} L${centerX-8} ${jawY+jawHeight+40} Q${centerX} ${jawY+jawHeight+45} ${centerX+8} ${jawY+jawHeight+40} L${centerX+25} ${jawY+5} Z`,
           channels: anatomy.roots[0].channels,
           centerX: centerX
         }];
@@ -147,7 +155,7 @@ const AnatomicalToothSVG = ({
         jawWidth = 95;
         crownPath = `M${centerX-35} 35 Q${centerX-35} 25 ${centerX-18} 15 L${centerX} 5 L${centerX+18} 15 Q${centerX+35} 25 ${centerX+35} 35 L${centerX+35} ${jawY} Q${centerX+35} ${jawY+5} ${centerX} ${jawY+5} Q${centerX-35} ${jawY+5} ${centerX-35} ${jawY} Z`;
         rootPaths = [{
-          path: `M${centerX-15} ${jawY+5} L${centerX-15} ${jawY+jawHeight+50} Q${centerX} ${jawY+jawHeight+55} ${centerX+15} ${jawY+jawHeight+50} L${centerX+15} ${jawY+5}`,
+          path: `M${centerX-28} ${jawY+5} L${centerX-10} ${jawY+jawHeight+50} Q${centerX} ${jawY+jawHeight+55} ${centerX+10} ${jawY+jawHeight+50} L${centerX+28} ${jawY+5} Z`,
           channels: anatomy.roots[0].channels,
           centerX: centerX
         }];
@@ -159,19 +167,19 @@ const AnatomicalToothSVG = ({
         if (anatomy.rootCount === 2) {
           rootPaths = [
             {
-              path: `M${centerX-20} ${jawY+5} L${centerX-20} ${jawY+jawHeight+45} Q${centerX-16} ${jawY+jawHeight+50} ${centerX-12} ${jawY+jawHeight+45} L${centerX-12} ${jawY+5}`,
+              path: `M${centerX-35} ${jawY+5} L${centerX-22} ${jawY+5} L${centerX-12} ${jawY+jawHeight+45} Q${centerX-16} ${jawY+jawHeight+50} ${centerX-20} ${jawY+jawHeight+45} L${centerX-30} ${jawY+jawHeight+40} Z`,
               channels: anatomy.roots[0].channels,
-              centerX: centerX-16
+              centerX: centerX-22
             },
             {
-              path: `M${centerX+12} ${jawY+5} L${centerX+12} ${jawY+jawHeight+45} Q${centerX+16} ${jawY+jawHeight+50} ${centerX+20} ${jawY+jawHeight+45} L${centerX+20} ${jawY+5}`,
+              path: `M${centerX+22} ${jawY+5} L${centerX+35} ${jawY+5} L${centerX+30} ${jawY+jawHeight+40} L${centerX+20} ${jawY+jawHeight+45} Q${centerX+16} ${jawY+jawHeight+50} ${centerX+12} ${jawY+jawHeight+45} Z`,
               channels: anatomy.roots[1].channels,
-              centerX: centerX+16
+              centerX: centerX+22
             }
           ];
         } else {
           rootPaths = [{
-            path: `M${centerX-15} ${jawY+5} L${centerX-15} ${jawY+jawHeight+45} Q${centerX} ${jawY+jawHeight+50} ${centerX+15} ${jawY+jawHeight+45} L${centerX+15} ${jawY+5}`,
+            path: `M${centerX-25} ${jawY+5} L${centerX-8} ${jawY+jawHeight+45} Q${centerX} ${jawY+jawHeight+50} ${centerX+8} ${jawY+jawHeight+45} L${centerX+25} ${jawY+5} Z`,
             channels: anatomy.roots[0].channels,
             centerX: centerX
           }];
@@ -184,17 +192,17 @@ const AnatomicalToothSVG = ({
         if (isUpper) {
           rootPaths = [
             {
-              path: `M${centerX-28} ${jawY+5} L${centerX-28} ${jawY+jawHeight+50} Q${centerX-24} ${jawY+jawHeight+55} ${centerX-20} ${jawY+jawHeight+50} L${centerX-20} ${jawY+5}`,
+              path: `M${centerX-45} ${jawY+5} L${centerX-32} ${jawY+5} L${centerX-20} ${jawY+jawHeight+50} Q${centerX-24} ${jawY+jawHeight+55} ${centerX-28} ${jawY+jawHeight+50} L${centerX-40} ${jawY+jawHeight+45} Z`,
               channels: anatomy.roots[0].channels,
-              centerX: centerX-24
+              centerX: centerX-32
             },
             {
-              path: `M${centerX+20} ${jawY+5} L${centerX+20} ${jawY+jawHeight+50} Q${centerX+24} ${jawY+jawHeight+55} ${centerX+28} ${jawY+jawHeight+50} L${centerX+28} ${jawY+5}`,
+              path: `M${centerX+32} ${jawY+5} L${centerX+45} ${jawY+5} L${centerX+40} ${jawY+jawHeight+45} L${centerX+28} ${jawY+jawHeight+50} Q${centerX+24} ${jawY+jawHeight+55} ${centerX+20} ${jawY+jawHeight+50} Z`,
               channels: anatomy.roots[1].channels,
-              centerX: centerX+24
+              centerX: centerX+32
             },
             {
-              path: `M${centerX-6} ${jawY+5} L${centerX-6} ${jawY+jawHeight+40} Q${centerX} ${jawY+jawHeight+45} ${centerX+6} ${jawY+jawHeight+40} L${centerX+6} ${jawY+5}`,
+              path: `M${centerX-15} ${jawY+5} L${centerX+15} ${jawY+5} L${centerX+6} ${jawY+jawHeight+40} Q${centerX} ${jawY+jawHeight+45} ${centerX-6} ${jawY+jawHeight+40} Z`,
               channels: anatomy.roots[2].channels,
               centerX: centerX
             }
@@ -202,14 +210,14 @@ const AnatomicalToothSVG = ({
         } else {
           rootPaths = [
             {
-              path: `M${centerX-20} ${jawY+5} L${centerX-20} ${jawY+jawHeight+50} Q${centerX-16} ${jawY+jawHeight+55} ${centerX-12} ${jawY+jawHeight+50} L${centerX-12} ${jawY+5}`,
+              path: `M${centerX-35} ${jawY+5} L${centerX-8} ${jawY+5} L${centerX-12} ${jawY+jawHeight+50} Q${centerX-16} ${jawY+jawHeight+55} ${centerX-20} ${jawY+jawHeight+50} L${centerX-32} ${jawY+jawHeight+45} Z`,
               channels: anatomy.roots[0].channels,
-              centerX: centerX-16
+              centerX: centerX-20
             },
             {
-              path: `M${centerX+12} ${jawY+5} L${centerX+12} ${jawY+jawHeight+50} Q${centerX+16} ${jawY+jawHeight+55} ${centerX+20} ${jawY+jawHeight+50} L${centerX+20} ${jawY+5}`,
+              path: `M${centerX+8} ${jawY+5} L${centerX+35} ${jawY+5} L${centerX+32} ${jawY+jawHeight+45} L${centerX+20} ${jawY+jawHeight+50} Q${centerX+16} ${jawY+jawHeight+55} ${centerX+12} ${jawY+jawHeight+50} Z`,
               channels: anatomy.roots[1].channels,
-              centerX: centerX+16
+              centerX: centerX+20
             }
           ];
         }
@@ -219,7 +227,7 @@ const AnatomicalToothSVG = ({
         jawWidth = 90;
         crownPath = `M${centerX-35} 30 Q${centerX-35} 15 ${centerX} 15 Q${centerX+35} 15 ${centerX+35} 30 L${centerX+35} ${jawY} Q${centerX+35} ${jawY+5} ${centerX} ${jawY+5} Q${centerX-35} ${jawY+5} ${centerX-35} ${jawY} Z`;
         rootPaths = [{
-          path: `M${centerX-15} ${jawY+5} L${centerX-15} ${jawY+jawHeight+40} Q${centerX} ${jawY+jawHeight+45} ${centerX+15} ${jawY+jawHeight+40} L${centerX+15} ${jawY+5}`,
+          path: `M${centerX-25} ${jawY+5} L${centerX-8} ${jawY+jawHeight+40} Q${centerX} ${jawY+jawHeight+45} ${centerX+8} ${jawY+jawHeight+40} L${centerX+25} ${jawY+5} Z`,
           channels: 1,
           centerX: centerX
         }];
@@ -238,7 +246,7 @@ const AnatomicalToothSVG = ({
           strokeWidth="3"
           rx="12"
           {...baseProps}
-          onClick={() => onSurfaceClick(number, 'jaw')}
+          onClick={readOnly ? undefined : () => onSurfaceClick(number, 'jaw')}
         />
         
         {/* Additional jaw detail for realism */}
@@ -261,7 +269,7 @@ const AnatomicalToothSVG = ({
           stroke={strokeColor}
           strokeWidth="2.5"
           {...baseProps}
-          onClick={() => onSurfaceClick(number, 'crown')}
+          onClick={readOnly ? undefined : () => onSurfaceClick(number, 'crown')}
         />
         
         {/* First render all roots clearly, then channels on top */}
@@ -276,7 +284,7 @@ const AnatomicalToothSVG = ({
               strokeLinejoin="round"
               strokeLinecap="round"
               {...baseProps}
-              onClick={() => onSurfaceClick(number, `root_${rootIndex + 1}`)}
+              onClick={readOnly ? undefined : () => onSurfaceClick(number, `root_${rootIndex + 1}`)}
             />
             
             {/* Root outline for better definition */}
@@ -290,59 +298,60 @@ const AnatomicalToothSVG = ({
           </g>
         ))}
         
-        {/* Now render channels on top of roots - clearly visible and clickable */}
-        {rootPaths.map((root, rootIndex) => 
+        {/* Render channels inside roots - visible but not hiding roots */}
+        {rootPaths.map((root, rootIndex) =>
           Array.from({ length: root.channels }, (_, channelIndex) => {
-            const channelOffset = root.channels === 1 ? 0 : (channelIndex - (root.channels - 1) / 2) * 12;
-            const startY = jawY + 10;
-            const endY = jawY + jawHeight + (toothType === 'canine' ? 50 : (toothType === 'molar' ? 50 : 45));
+            const channelOffset = root.channels === 1 ? 0 : (channelIndex - (root.channels - 1) / 2) * 8;
+            const startY = jawY + 15;
+            const endY = jawY + jawHeight + (toothType === 'canine' ? 45 : (toothType === 'molar' ? 45 : 35));
             const channelId = `channel_${rootIndex + 1}_${channelIndex + 1}`;
-            
+
             return (
               <g key={`channel-${rootIndex}-${channelIndex}`}>
                 {/* Large clickable area for easy clicking */}
                 <rect
-                  x={root.centerX + channelOffset - 12}
+                  x={root.centerX + channelOffset - 10}
                   y={startY}
-                  width="24"
+                  width="20"
                   height={endY - startY}
                   fill="transparent"
                   style={{ cursor: 'pointer' }}
-                  onClick={() => onSurfaceClick(number, channelId)}
+                  onClick={readOnly ? undefined : () => onSurfaceClick(number, channelId)}
                 />
-                
-                {/* Channel background for visibility */}
+
+                {/* Channel outline for visibility */}
                 <line
                   x1={root.centerX + channelOffset}
-                  y1={startY + 5}
+                  y1={startY}
                   x2={root.centerX + channelOffset}
-                  y2={endY - 5}
-                  stroke={theme.palette.mode === 'dark' ? '#333' : '#f0f0f0'}
-                  strokeWidth="14"
+                  y2={endY}
+                  stroke={theme.palette.mode === 'dark' ? '#222' : '#888'}
+                  strokeWidth="8"
                   strokeLinecap="round"
+                  opacity="0.8"
                 />
-                
-                {/* Main channel line - clearly visible and colorable */}
+
+                {/* Main channel fill - colored based on condition */}
                 <line
                   x1={root.centerX + channelOffset}
-                  y1={startY + 5}
+                  y1={startY}
                   x2={root.centerX + channelOffset}
-                  y2={endY - 5}
+                  y2={endY}
                   stroke={getConditionColor(channelId)}
-                  strokeWidth="10"
+                  strokeWidth="6"
                   strokeLinecap="round"
                 />
-                
-                {/* Channel border for definition */}
+
+                {/* Channel center line for definition */}
                 <line
                   x1={root.centerX + channelOffset}
-                  y1={startY + 5}
+                  y1={startY}
                   x2={root.centerX + channelOffset}
-                  y2={endY - 5}
-                  stroke={theme.palette.mode === 'dark' ? '#555' : '#ccc'}
-                  strokeWidth="2"
+                  y2={endY}
+                  stroke={theme.palette.mode === 'dark' ? '#444' : '#666'}
+                  strokeWidth="1"
                   strokeLinecap="round"
-                  opacity="0.7"
+                  opacity="0.6"
                 />
               </g>
             );
@@ -393,7 +402,7 @@ const AnatomicalToothSVG = ({
           stroke={strokeColor}
           strokeWidth="3"
           {...baseProps}
-          onClick={() => onSurfaceClick(number, 'occlusal')}
+          onClick={readOnly ? undefined : () => onSurfaceClick(number, 'occlusal')}
         />
         <path
           d={`M 0,0 L ${radius},0 A ${radius},${radius} 0 0,1 0,${radius} L 0,0 Z`}
@@ -401,7 +410,7 @@ const AnatomicalToothSVG = ({
           stroke={strokeColor}
           strokeWidth="3"
           {...baseProps}
-          onClick={() => onSurfaceClick(number, 'distal')}
+          onClick={readOnly ? undefined : () => onSurfaceClick(number, 'distal')}
         />
         <path
           d={`M 0,0 L 0,${radius} A ${radius},${radius} 0 0,1 -${radius},0 L 0,0 Z`}
@@ -409,7 +418,7 @@ const AnatomicalToothSVG = ({
           stroke={strokeColor}
           strokeWidth="3"
           {...baseProps}
-          onClick={() => onSurfaceClick(number, 'cervical')}
+          onClick={readOnly ? undefined : () => onSurfaceClick(number, 'cervical')}
         />
         <path
           d={`M 0,0 L -${radius},0 A ${radius},${radius} 0 0,1 0,-${radius} L 0,0 Z`}
@@ -417,7 +426,7 @@ const AnatomicalToothSVG = ({
           stroke={strokeColor}
           strokeWidth="3"
           {...baseProps}
-          onClick={() => onSurfaceClick(number, 'mesial')}
+          onClick={readOnly ? undefined : () => onSurfaceClick(number, 'mesial')}
         />
         
         {/* Large center circle - more visible with enhanced styling */}
@@ -428,7 +437,7 @@ const AnatomicalToothSVG = ({
           stroke={strokeColor}
           strokeWidth="4"
           {...baseProps}
-          onClick={() => onSurfaceClick(number, 'pulp')}
+          onClick={readOnly ? undefined : () => onSurfaceClick(number, 'pulp')}
         />
         
         {/* Center circle highlight for better visibility */}

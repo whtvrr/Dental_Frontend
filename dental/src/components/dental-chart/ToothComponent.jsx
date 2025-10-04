@@ -3,12 +3,13 @@ import { Box, Typography, useTheme } from '@mui/material';
 import { tokens } from '../../theme';
 import AnatomicalToothSVG from './AnatomicalToothSVG';
 
-const ToothComponent = ({ 
-  number, 
-  conditions = {}, 
-  onSurfaceClick, 
+const ToothComponent = ({
+  number,
+  conditions = {},
+  onSurfaceClick,
   isSelected,
-  statusesMap = {}
+  statusesMap = {},
+  readOnly = false
 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -31,6 +32,7 @@ const ToothComponent = ({
         onSurfaceClick={onSurfaceClick}
         isSelected={isSelected}
         statusesMap={statusesMap}
+        readOnly={readOnly}
       />
       
     </Box>

@@ -14,7 +14,6 @@ import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 // import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutlined";
 // import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 // import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
@@ -41,7 +40,7 @@ const Sidebar = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [selected, setSelected] = useState("Панель управления");
+    const [selected, setSelected] = useState("Зубная формула");
     
   return (
     <Box
@@ -120,7 +119,7 @@ const Sidebar = () => {
 
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
-              title="Панель управления"
+              title="Зубная формула"
               to="/"
               icon={<HomeOutlinedIcon />}
               selected={selected}
@@ -170,13 +169,6 @@ const Sidebar = () => {
             >
               Страницы
             </Typography>
-            <Item
-              title="Зубная формула"
-              to="/dental-chart"
-              icon={<LocalHospitalIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
             <Item
               title="Регистрация пользователей"
               to="/registration"

@@ -17,18 +17,18 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { tokens } from '../../theme';
-import { useStatuses } from '../../hooks/useStatuses';
 
-const ConditionModal = ({ 
-  open, 
-  onClose, 
-  onSelect, 
-  selectedTooth, 
-  selectedSurface 
+const ConditionModal = ({
+  open,
+  onClose,
+  onSelect,
+  selectedTooth,
+  selectedSurface,
+  statusesMap = {},
+  statusesLoading = false
 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const { statusesMap, loading: statusesLoading } = useStatuses();
   const navigate = useNavigate();
 
   const handleManageStatuses = () => {

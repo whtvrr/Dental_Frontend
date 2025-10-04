@@ -5,7 +5,6 @@ import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
 import Team from "./scenes/team";
 import Contacts from "./scenes/contacts";
-import DentalChartPage from "./scenes/dental-chart";
 import RegistrationForm from "./scenes/registration";
 import LoginPage from "./scenes/login";
 import FAQ from "./scenes/faq";
@@ -15,6 +14,7 @@ import Statuses from "./scenes/statuses";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import { AuthProvider } from "./context/AuthContext";
+import { StatusProvider } from "./context/StatusContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Calendar from "./scenes/calendar/calendar";
 
@@ -26,7 +26,8 @@ function App() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <AuthProvider>
-          <CssBaseline />
+          <StatusProvider>
+            <CssBaseline />
           <Routes>
             {/* Public route - Login */}
             <Route path="/login" element={<LoginPage />} />
@@ -45,8 +46,6 @@ function App() {
                       <Route path="/clients/:id" element={<ClientDetail />} />
                       <Route path="/complaints" element={<Complaints />} />
                       <Route path="/statuses" element={<Statuses />} />
-                      <Route path="/dental-chart" element={<DentalChartPage />} />
-                      <Route path="/patients/:patientId/dental-chart" element={<DentalChartPage />} />
                       <Route path="/registration" element={<RegistrationForm />} />  
                       <Route path="/faq" element={<FAQ />} /> 
                       <Route path="/calendar" element={<Calendar />} />
@@ -56,6 +55,7 @@ function App() {
               </ProtectedRoute>
             } />
           </Routes>
+          </StatusProvider>
         </AuthProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
