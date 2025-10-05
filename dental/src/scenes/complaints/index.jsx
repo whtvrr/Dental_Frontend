@@ -1,8 +1,8 @@
-import { 
-  Box, 
-  useTheme, 
-  CircularProgress, 
-  Alert, 
+import {
+  Box,
+  useTheme,
+  CircularProgress,
+  Alert,
   Button,
   Dialog,
   DialogTitle,
@@ -11,7 +11,8 @@ import {
   TextField,
   IconButton,
   Fab,
-  Tooltip
+  Tooltip,
+  useMediaQuery
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
@@ -26,6 +27,7 @@ const Complaints = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const api = useApi();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   const [complaintsData, setComplaintsData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -240,7 +242,7 @@ const Complaints = () => {
   };
 
   return (
-    <Box m="20px">
+    <Box m={isMobile ? "10px" : "20px"}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb="20px">
         <Header
           title="ЖАЛОБЫ"

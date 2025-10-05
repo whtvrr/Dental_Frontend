@@ -31,6 +31,78 @@ body,
   position: relative;
 }
 
+.content {
+  flex: 1;
+  overflow-x: auto;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .app {
+    flex-direction: row; /* Keep flex row but sidebar will be overlay */
+  }
+
+  .content {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  /* Ensure proper spacing on mobile */
+  .MuiBox-root {
+    word-wrap: break-word;
+  }
+
+  /* Mobile table adjustments */
+  .MuiDataGrid-root {
+    font-size: 0.8rem !important;
+  }
+
+  .MuiDataGrid-cell {
+    padding: 4px !important;
+  }
+
+  .MuiDataGrid-columnHeaderTitle {
+    font-size: 0.75rem !important;
+  }
+
+  /* Mobile calendar adjustments */
+  .fc-toolbar {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .fc-toolbar-chunk {
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .fc-button-group {
+    display: flex !important;
+  }
+
+  .fc-button {
+    padding: 4px 8px !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Mobile modal adjustments */
+  .MuiDialog-paper {
+    margin: 16px !important;
+    width: calc(100% - 32px) !important;
+    max-width: none !important;
+  }
+
+  /* Mobile form adjustments */
+  .MuiTextField-root {
+    margin-bottom: 8px !important;
+  }
+
+  /* Mobile sidebar pro-sidebar adjustments */
+  .pro-sidebar-inner {
+    width: 250px !important;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 10px;
 }

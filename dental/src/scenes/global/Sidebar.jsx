@@ -1,7 +1,7 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {ProSidebar, Menu, MenuItem} from "react-pro-sidebar";
 import 'react-pro-sidebar/dist/css/styles.css';
-import {Box, IconButton,  Typography, useTheme} from '@mui/material';
+import {Box, IconButton,  Typography, useTheme, useMediaQuery} from '@mui/material';
 import {Link } from "react-router-dom";
 import {tokens} from "../../theme";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
@@ -37,11 +37,30 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
   );
 };
 
-const Sidebar = () => {
+const Sidebar = ({ isSidebar, setIsSidebar }) => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [selected, setSelected] = useState("Зубная формула");
+
+    // Handle mobile state properly
+    useEffect(() => {
+        if (isMobile) {
+            setIsCollapsed(!isSidebar);
+        } else {
+            setIsCollapsed(false);
+        }
+    }, [isMobile, isSidebar]);
+
+    // Handle toggle for mobile
+    const handleToggle = () => {
+        if (isMobile) {
+            setIsSidebar && setIsSidebar(!isSidebar);
+        } else {
+            setIsCollapsed(!isCollapsed);
+        }
+    };
 
     // Get user role from localStorage
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -51,34 +70,66 @@ const Sidebar = () => {
     const logoPath = userRole === 'doctor' ? '/DOCTOR LOGO.png' : '/ADMIN LOGO.png';
 
   return (
-    <Box
-      sx={{
-        "& .pro-sidebar-inner": {
-          background: `${colors.primary[400]} !important`,
-        },
-        "& .pro-icon-wrapper": {
-          backgroundColor: "transparent !important",
-        },
-        "& .pro-inner-item": {
-          padding: "5px 35px 5px 20px !important",
-        },
-        "& .pro-inner-item:hover": {
-          color: "#868dfb !important",
-        },
-        "& .pro-menu-item.active": {
-          color: "#6870fa !important",
-        },
-        "& .pro-sidebar": {
-          width: "300px !important",
-          minWidth: "300px !important",
-        },
-      }}
-    >
+    <>
+      {/* Mobile overlay */}
+      {isMobile && isSidebar && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 1200,
+          }}
+          onClick={() => setIsSidebar && setIsSidebar(false)}
+        />
+      )}
+
+      <Box
+        sx={{
+          position: isMobile ? "fixed" : "static",
+          top: isMobile ? 0 : "auto",
+          left: isMobile ? 0 : "auto",
+          height: isMobile ? "100vh" : "100vh",
+          zIndex: isMobile ? 1300 : "auto",
+          transform: isMobile
+            ? (isSidebar ? "translateX(0)" : "translateX(-100%)")
+            : "translateX(0)",
+          transition: isMobile ? "transform 0.3s ease" : "none",
+          "& .pro-sidebar-inner": {
+            background: `${colors.primary[400]} !important`,
+            height: "100vh !important",
+          },
+          "& .pro-icon-wrapper": {
+            backgroundColor: "transparent !important",
+          },
+          "& .pro-inner-item": {
+            padding: "5px 35px 5px 20px !important",
+          },
+          "& .pro-inner-item:hover": {
+            color: "#868dfb !important",
+          },
+          "& .pro-menu-item.active": {
+            color: "#6870fa !important",
+          },
+          "& .pro-sidebar": {
+            width: isMobile
+              ? "250px !important"
+              : (isCollapsed ? "80px !important" : "300px !important"),
+            minWidth: isMobile
+              ? "250px !important"
+              : (isCollapsed ? "80px !important" : "300px !important"),
+            transition: isMobile ? "none" : "width 0.3s ease !important",
+          },
+        }}
+      >
       <ProSidebar collapsed={isCollapsed}>
         <Menu iconShape="square">
           {/* LOGO AND MENU ICON */}
           <MenuItem
-            onClick={() => setIsCollapsed(!isCollapsed)}
+            onClick={handleToggle}
             icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
             style={{
               margin: "10px 0 20px 0",
@@ -95,7 +146,7 @@ const Sidebar = () => {
                 <Typography variant="h3" color={colors.grey[100]}>
                   Dental
                 </Typography>
-                <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
+                <IconButton onClick={handleToggle}>
                   <MenuOutlinedIcon />
                 </IconButton>
               </Box>
@@ -242,6 +293,7 @@ const Sidebar = () => {
         </Menu>
       </ProSidebar>
     </Box>
+    </>
   );
 };
 

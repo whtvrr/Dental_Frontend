@@ -7,7 +7,8 @@ import {
   Paper,
   useTheme,
   Alert,
-  CircularProgress
+  CircularProgress,
+  useMediaQuery
 } from "@mui/material";
 import { tokens } from "../../theme";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
@@ -20,6 +21,7 @@ const Dashboard = () => {
   const colors = tokens(theme.palette.mode);
   const chartRef = useRef(null);
   const { statusesLookup } = useStatusContext();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [heading, setHeading] = useState('Зубная формула пациента');
   const [isExporting, setIsExporting] = useState(false);
@@ -206,12 +208,29 @@ const Dashboard = () => {
   };
 
   return (
-    <Box m="20px">
+    <Box m={isMobile ? "10px" : "20px"}>
       {/* HEADER */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems={isMobile ? "flex-start" : "center"}
+        mb={3}
+        sx={{
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? 2 : 0
+        }}
+      >
         <Header title="ЗУБНАЯ ФОРМУЛА" subtitle="Интерактивная карта состояния зубов" />
 
-        <Box display="flex" gap={2} alignItems="center">
+        <Box
+          display="flex"
+          gap={isMobile ? 1 : 2}
+          alignItems={isMobile ? "stretch" : "center"}
+          sx={{
+            flexDirection: isMobile ? "column" : "row",
+            width: isMobile ? "100%" : "auto"
+          }}
+        >
           <TextField
             label="Заголовок для PDF"
             value={heading}
@@ -219,7 +238,7 @@ const Dashboard = () => {
             variant="outlined"
             size="small"
             sx={{
-              width: 250,
+              width: isMobile ? "100%" : 250,
               '& .MuiOutlinedInput-root': {
                 color: colors.grey[100]
               },
@@ -235,12 +254,13 @@ const Dashboard = () => {
           <Button
             onClick={handleExportPDF}
             disabled={isExporting}
+            fullWidth={isMobile}
             sx={{
               backgroundColor: colors.blueAccent[700],
               color: colors.grey[100],
-              fontSize: "14px",
+              fontSize: isMobile ? "12px" : "14px",
               fontWeight: "bold",
-              padding: "10px 20px",
+              padding: isMobile ? "8px 16px" : "10px 20px",
               '&:hover': {
                 backgroundColor: colors.blueAccent[800]
               },
@@ -252,7 +272,7 @@ const Dashboard = () => {
             {isExporting ? (
               <CircularProgress size={20} sx={{ mr: 1 }} />
             ) : (
-              <DownloadOutlinedIcon sx={{ mr: "10px" }} />
+              <DownloadOutlinedIcon sx={{ mr: isMobile ? "5px" : "10px" }} />
             )}
             {isExporting ? 'Экспорт...' : 'Экспорт в PDF'}
           </Button>
@@ -278,7 +298,7 @@ const Dashboard = () => {
           backgroundColor: colors.primary[400],
           borderRadius: 2,
           overflow: 'hidden',
-          p: 2
+          p: isMobile ? 1 : 2
         }}
       >
         <Typography

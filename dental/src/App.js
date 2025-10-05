@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
@@ -11,7 +11,7 @@ import FAQ from "./scenes/faq";
 import ClientDetail from "./scenes/client-detail";
 import Complaints from "./scenes/complaints";
 import Statuses from "./scenes/statuses";
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { CssBaseline, ThemeProvider, useMediaQuery } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import { AuthProvider } from "./context/AuthContext";
 import { StatusProvider } from "./context/StatusContext";
@@ -20,7 +20,13 @@ import Calendar from "./scenes/calendar/calendar";
 
 function App() {
   const [theme, colorMode] = useMode();
-  const [isSidebar, setIsSidebar] = useState(true);
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [isSidebar, setIsSidebar] = useState(!isMobile); // Default to closed on mobile, open on desktop
+
+  // Update sidebar state when screen size changes
+  React.useEffect(() => {
+    setIsSidebar(!isMobile);
+  }, [isMobile]);
 
   return (
     <ColorModeContext.Provider value={colorMode}>
@@ -36,7 +42,7 @@ function App() {
             <Route path="/*" element={
               <ProtectedRoute>
                 <div className="app">
-                  <Sidebar isSidebar={isSidebar} />
+                  <Sidebar isSidebar={isSidebar} setIsSidebar={setIsSidebar} />
                   <main className="content">
                     <Topbar setIsSidebar={setIsSidebar} />
                     <Routes>

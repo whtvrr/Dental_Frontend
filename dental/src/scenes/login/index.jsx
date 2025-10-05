@@ -11,7 +11,8 @@ import {
   Fade,
   InputAdornment,
   IconButton,
-  Container
+  Container,
+  useMediaQuery
 } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
@@ -34,6 +35,7 @@ const LoginPage = () => {
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleFormSubmit = async (values) => {
     setIsSubmitting(true);
@@ -110,9 +112,9 @@ const LoginPage = () => {
           <Paper
             elevation={24}
             sx={{
-              p: 6,
+              p: isMobile ? 3 : 6,
               backgroundColor: colors.primary[400],
-              borderRadius: '20px',
+              borderRadius: isMobile ? '12px' : '20px',
               border: `1px solid ${colors.grey[700]}`,
               boxShadow: theme.palette.mode === 'dark'
                 ? `0 20px 60px ${colors.primary[900]}60, 0 8px 32px ${colors.primary[900]}40`
@@ -120,6 +122,7 @@ const LoginPage = () => {
               backdropFilter: 'blur(20px)',
               position: 'relative',
               overflow: 'hidden',
+              margin: isMobile ? '10px' : '0',
               '&::before': {
                 content: '""',
                 position: 'absolute',

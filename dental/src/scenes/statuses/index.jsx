@@ -1,8 +1,8 @@
-import { 
-  Box, 
-  useTheme, 
-  CircularProgress, 
-  Alert, 
+import {
+  Box,
+  useTheme,
+  CircularProgress,
+  Alert,
   Button,
   Dialog,
   DialogTitle,
@@ -19,7 +19,8 @@ import {
   MenuItem,
   FormControlLabel,
   Switch,
-  Tooltip
+  Tooltip,
+  useMediaQuery
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
@@ -34,6 +35,7 @@ const Statuses = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const api = useApi();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   const [statusesData, setStatusesData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -347,7 +349,7 @@ const Statuses = () => {
   };
 
   return (
-    <Box m="20px">
+    <Box m={isMobile ? "10px" : "20px"}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb="20px">
         <Header
           title="СТАТУСЫ"

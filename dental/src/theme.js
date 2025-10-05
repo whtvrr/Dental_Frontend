@@ -78,12 +78,12 @@ primary: {
     100: "#040509",
     200: "#080b12",
     300: "#0c101b",
-    400: "#f2f0f0",
-    500: "#141b2d",
-    600: "#434957",
-    700: "#727681",
-    800: "#a1a4ab",
-    900: "#d0d1d5",
+    400: "#ffffff",
+    500: "#fcfcfc",
+    600: "#e6e6e6",
+    700: "#cccccc",
+    800: "#999999",
+    900: "#666666",
 },
 greenAccent: {
     100: "#0f2922",
@@ -145,18 +145,22 @@ export const themeSettings = (mode) => {
                     } 
                   }  : {
                     primary: {
-                        main: colors.primary[500],
+                        main: colors.primary[900],
                     },
                     secondary: {
                         main: colors.greenAccent[500],
                     },
                     neutral: {
-                        dark: colors.grey[700],
+                        dark: colors.grey[100],
                         main: colors.grey[500],
-                        light: colors.grey[100]
+                        light: colors.grey[900]
                     },
                     background: {
                         default: "#fcfcfc",
+                    },
+                    text: {
+                        primary: colors.grey[100],
+                        secondary: colors.grey[200],
                     },
                 }),
         },

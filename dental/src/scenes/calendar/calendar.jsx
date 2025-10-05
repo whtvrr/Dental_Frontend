@@ -32,6 +32,7 @@ import {
   DialogContentText,
   Switch,
   FormControlLabel,
+  useMediaQuery,
 } from "@mui/material";
 import { buildApiUrl } from "../../config/api";
 import API_CONFIG from "../../config/api";
@@ -48,6 +49,7 @@ const Calendar = () => {
   const colors = tokens(theme.palette.mode);
   const authContext = useContext(AuthContext);
   const apiClient = useMemo(() => new ApiClient(authContext), [authContext]);
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Helper function to format date as DD.MM.YYYY for API
   const formatDateForAPI = (date) => {
@@ -706,15 +708,23 @@ const Calendar = () => {
   };
 
   return (
-    <Box m="20px">
+    <Box m={isMobile ? "10px" : "20px"}>
       <Header title={translations.calendarTitle} subtitle={translations.calendarSubtitle} />
 
-      <Box display="flex" justifyContent="space-between">
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        sx={{
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? 2 : 0
+        }}
+      >
         {/* CALENDAR SIDEBAR */}
         <Box
-          flex="1 1 20%"
+          flex={isMobile ? "none" : "1 1 20%"}
+          width={isMobile ? "100%" : "auto"}
           backgroundColor={colors.primary[400]}
-          p="15px"
+          p={isMobile ? "10px" : "15px"}
           borderRadius="4px"
         >
           <Typography variant="h5">{translations.upcomingAppointments}</Typography>
@@ -774,7 +784,11 @@ const Calendar = () => {
         </Box>
 
         {/* CALENDAR */}
-        <Box flex="1 1 100%" ml="15px">
+        <Box
+          flex={isMobile ? "none" : "1 1 100%"}
+          width={isMobile ? "100%" : "auto"}
+          ml={isMobile ? "0" : "15px"}
+        >
           {/* Appointment Button */}
           <Box display="flex" justifyContent="flex-end" mb="10px">
             <Button
@@ -794,7 +808,7 @@ const Calendar = () => {
           </Box>
 
           <FullCalendar
-            height="75vh"
+            height={isMobile ? "60vh" : "75vh"}
             plugins={[
               dayGridPlugin,
               timeGridPlugin,
@@ -802,9 +816,9 @@ const Calendar = () => {
               listPlugin,
             ]}
             headerToolbar={{
-              left: "prev,next today",
+              left: isMobile ? "prev,next" : "prev,next today",
               center: "title",
-              right: "dayGridMonth,timeGridWeek,timeGridDay,listMonth",
+              right: isMobile ? "dayGridMonth,listMonth" : "dayGridMonth,timeGridWeek,timeGridDay,listMonth",
             }}
             initialView="dayGridMonth"
             editable={false}

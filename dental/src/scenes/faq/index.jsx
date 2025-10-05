@@ -1,4 +1,4 @@
-import { Box, useTheme } from "@mui/material";
+import { Box, useTheme, useMediaQuery } from "@mui/material";
 import Header from "../../components/Header";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -10,8 +10,10 @@ import { tokens } from "../../theme";
 const FAQ = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   return (
-    <Box m="20px">
+    <Box m={isMobile ? "10px" : "20px"}>
       <Header title="Часто задаваемые вопросы" subtitle="Инструкции по использованию системы" />
 
       <Accordion defaultExpanded>

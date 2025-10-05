@@ -19,7 +19,8 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemIcon
+  ListItemIcon,
+  useMediaQuery
 } from '@mui/material';
 import {
   ArrowBack,
@@ -48,6 +49,7 @@ const ClientDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const api = useApi();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -331,7 +333,7 @@ const ClientDetail = () => {
 
   if (loading) {
     return (
-      <Box m="20px" display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+      <Box m={isMobile ? "10px" : "20px"} display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
         <CircularProgress />
         <Typography variant="h6" sx={{ ml: 2, color: colors.grey[100] }}>
           {translations.loadingClientDetails}
@@ -342,7 +344,7 @@ const ClientDetail = () => {
 
   if (error) {
     return (
-      <Box m="20px">
+      <Box m={isMobile ? "10px" : "20px"}>
         <Header title={translations.clientDetails} subtitle={translations.clientInfo} />
         <Alert severity="error" sx={{ mt: 2 }}>
           {translations.error}: {error}
@@ -360,7 +362,7 @@ const ClientDetail = () => {
 
   if (!client) {
     return (
-      <Box m="20px">
+      <Box m={isMobile ? "10px" : "20px"}>
         <Header title={translations.clientDetails} subtitle={translations.clientInfo} />
         <Alert severity="warning" sx={{ mt: 2 }}>
           {translations.noDataFound}
@@ -377,8 +379,17 @@ const ClientDetail = () => {
   }
 
   return (
-    <Box m="20px">
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+    <Box m={isMobile ? "10px" : "20px"}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems={isMobile ? "flex-start" : "center"}
+        mb={3}
+        sx={{
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? 2 : 0
+        }}
+      >
         <Header
           title={translations.clientDetails}
           subtitle={`${translations.clientInfo}: ${client.full_name}`}

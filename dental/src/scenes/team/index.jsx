@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme, CircularProgress, Alert, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem } from "@mui/material";
+import { Box, Typography, useTheme, CircularProgress, Alert, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, useMediaQuery } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import { useState, useEffect } from "react";
@@ -16,6 +16,7 @@ const Team = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const api = useApi();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [staffData, setStaffData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -87,22 +88,32 @@ const Team = () => {
   };
 
   const columns = [
-    { field: "id", headerName: "ID", flex: 1 },
+    {
+      field: "id",
+      headerName: "ID",
+      flex: isMobile ? 0.3 : 0.5,
+      minWidth: isMobile ? 50 : 70
+    },
     {
       field: "full_name",
       headerName: translations.fullName,
-      flex: 1,
+      flex: isMobile ? 1.5 : 1,
+      minWidth: isMobile ? 120 : 150,
       cellClassName: "name-column--cell",
     },
     {
       field: "email",
       headerName: translations.email,
       flex: 1,
+      minWidth: isMobile ? 100 : 150,
+      hide: isMobile, // Hide on mobile
     },
     {
       field: "phone_number",
       headerName: translations.phoneNumber,
       flex: 1,
+      minWidth: isMobile ? 100 : 120,
+      hide: isMobile, // Hide on mobile
     },
     {
       field: "role",
@@ -138,27 +149,36 @@ const Team = () => {
     {
       field: "actions",
       headerName: translations.actions,
-      flex: 0.5,
+      flex: isMobile ? 0.8 : 0.5,
+      minWidth: isMobile ? 60 : 80,
       sortable: false,
       renderCell: ({ row }) => (
-        <Box display="flex" gap="8px">
+        <Box display="flex" gap={isMobile ? "4px" : "8px"}>
           <IconButton
             onClick={(e) => {
               e.stopPropagation();
               handleEditClick(row);
             }}
-            sx={{ color: colors.greenAccent[400] }}
+            sx={{
+              color: colors.greenAccent[400],
+              p: isMobile ? 0.5 : 1
+            }}
+            size={isMobile ? "small" : "medium"}
           >
-            <EditOutlinedIcon />
+            <EditOutlinedIcon fontSize={isMobile ? "small" : "medium"} />
           </IconButton>
           <IconButton
             onClick={(e) => {
               e.stopPropagation();
               handleDeleteClick(row);
             }}
-            sx={{ color: colors.redAccent[400] }}
+            sx={{
+              color: colors.redAccent[400],
+              p: isMobile ? 0.5 : 1
+            }}
+            size={isMobile ? "small" : "medium"}
           >
-            <DeleteOutlineIcon />
+            <DeleteOutlineIcon fontSize={isMobile ? "small" : "medium"} />
           </IconButton>
         </Box>
       ),
@@ -196,7 +216,7 @@ const Team = () => {
   }, [offset]);
 
   return (
-    <Box m="20px">
+    <Box m={isMobile ? "10px" : "20px"}>
       <Header title={translations.teamTitle} subtitle={translations.teamSubtitle} />
 
       {error && (
@@ -204,10 +224,10 @@ const Team = () => {
           {translations.error}: {error}
         </Alert>
       )}
-      
+
       <Box
-        m="40px 0 0 0"
-        height="75vh"
+        m={isMobile ? "20px 0 0 0" : "40px 0 0 0"}
+        height={isMobile ? "calc(100vh - 200px)" : "75vh"}
         sx={{
           "& .MuiDataGrid-root": {
             border: "none",

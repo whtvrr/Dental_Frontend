@@ -1,4 +1,4 @@
-import { Box, useTheme, CircularProgress, Alert, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, InputLabel, Select, Grid } from "@mui/material";
+import { Box, useTheme, CircularProgress, Alert, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, InputLabel, Select, Grid, useMediaQuery } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -23,6 +23,7 @@ const Contacts = () => {
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
   const api = useApi();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [clientsData, setClientsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -170,33 +171,48 @@ const Contacts = () => {
   };
 
   const columns = [
-    { field: "id", headerName: "ID", flex: 0.5 },
+    {
+      field: "id",
+      headerName: "ID",
+      flex: isMobile ? 0.3 : 0.5,
+      minWidth: isMobile ? 50 : 70
+    },
     {
       field: "full_name",
       headerName: translations.fullName,
-      flex: 1,
+      flex: isMobile ? 1.5 : 1,
+      minWidth: isMobile ? 120 : 150,
       cellClassName: "name-column--cell",
     },
     {
       field: "phone_number",
       headerName: translations.phoneNumber,
       flex: 1,
+      minWidth: isMobile ? 100 : 120,
+      hide: isMobile, // Hide on mobile to save space
     },
     {
       field: "address",
       headerName: translations.address,
       flex: 1,
+      minWidth: isMobile ? 100 : 150,
+      hide: isMobile, // Hide on mobile to save space
     },
     {
       field: "gender",
       headerName: translations.gender,
-      flex: 0.5,
+      flex: isMobile ? 0.8 : 0.5,
+      minWidth: isMobile ? 70 : 80,
       renderCell: ({ row: { gender } }) => {
         return (
           <Chip
             label={translateGender(gender)}
             color={gender === 'male' ? 'primary' : gender === 'female' ? 'secondary' : 'default'}
             size="small"
+            sx={{
+              fontSize: isMobile ? '0.7rem' : '0.8rem',
+              height: isMobile ? '20px' : '24px'
+            }}
           />
         );
       },
@@ -205,32 +221,42 @@ const Contacts = () => {
       field: "birth_date",
       headerName: translations.birthDate,
       flex: 1,
+      minWidth: isMobile ? 90 : 120,
       renderCell: ({ row: { birth_date } }) => formatDate(birth_date),
     },
     {
       field: "actions",
       headerName: translations.actions,
-      flex: 0.5,
+      flex: isMobile ? 0.8 : 0.5,
+      minWidth: isMobile ? 60 : 80,
       sortable: false,
       renderCell: ({ row }) => (
-        <Box display="flex" gap="8px">
+        <Box display="flex" gap={isMobile ? "4px" : "8px"}>
           <IconButton
             onClick={(e) => {
               e.stopPropagation();
               handleEditClick(row);
             }}
-            sx={{ color: colors.greenAccent[400] }}
+            sx={{
+              color: colors.greenAccent[400],
+              p: isMobile ? 0.5 : 1
+            }}
+            size={isMobile ? "small" : "medium"}
           >
-            <EditOutlinedIcon />
+            <EditOutlinedIcon fontSize={isMobile ? "small" : "medium"} />
           </IconButton>
           <IconButton
             onClick={(e) => {
               e.stopPropagation();
               handleDeleteClick(row);
             }}
-            sx={{ color: colors.redAccent[400] }}
+            sx={{
+              color: colors.redAccent[400],
+              p: isMobile ? 0.5 : 1
+            }}
+            size={isMobile ? "small" : "medium"}
           >
-            <DeleteOutlineIcon />
+            <DeleteOutlineIcon fontSize={isMobile ? "small" : "medium"} />
           </IconButton>
         </Box>
       ),
@@ -281,47 +307,67 @@ const Contacts = () => {
   };
 
   return (
-    <Box m="20px">
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb="20px">
+    <Box m={isMobile ? "10px" : "20px"}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems={isMobile ? "flex-start" : "center"}
+        mb="20px"
+        sx={{
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? 2 : 0
+        }}
+      >
         <Header
           title={translations.contactsTitle}
           subtitle={translations.contactsSubtitle}
         />
-        <Box display="flex" gap={2} alignItems="center">
-        <TextField
-          variant="outlined"
-          size="small"
-          placeholder="Поиск клиентов..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+        <Box
+          display="flex"
+          gap={isMobile ? 1 : 2}
+          alignItems={isMobile ? "stretch" : "center"}
           sx={{
-            minWidth: "300px",
-            backgroundColor: colors.primary[400],
-            input: { color: colors.grey[100] },
-            '& .MuiOutlinedInput-root fieldset': {
-              borderColor: colors.grey[300],
-            },
-            '& .MuiOutlinedInput-root:hover fieldset': {
-              borderColor: colors.greenAccent[400],
-            },
-          }}
-        />
-
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleAddClientClick}
-          sx={{
-            backgroundColor: colors.greenAccent[600],
-            '&:hover': {
-              backgroundColor: colors.greenAccent[700],
-            },
+            flexDirection: isMobile ? "column" : "row",
+            width: isMobile ? "100%" : "auto"
           }}
         >
-          Добавить нового клиента
-        </Button>
+          <TextField
+            variant="outlined"
+            size="small"
+            placeholder="Поиск клиентов..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{
+              minWidth: isMobile ? "100%" : "300px",
+              backgroundColor: colors.primary[400],
+              input: { color: colors.grey[100] },
+              '& .MuiOutlinedInput-root fieldset': {
+                borderColor: colors.grey[300],
+              },
+              '& .MuiOutlinedInput-root:hover fieldset': {
+                borderColor: colors.greenAccent[400],
+              },
+            }}
+          />
+
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleAddClientClick}
+            fullWidth={isMobile}
+            sx={{
+              backgroundColor: colors.greenAccent[600],
+              fontSize: isMobile ? "12px" : "14px",
+              padding: isMobile ? "8px 16px" : "6px 16px",
+              '&:hover': {
+                backgroundColor: colors.greenAccent[700],
+              },
+            }}
+          >
+            {isMobile ? "Добавить клиента" : "Добавить нового клиента"}
+          </Button>
+        </Box>
       </Box>
-    </Box>
 
 
       {error && (
@@ -329,10 +375,10 @@ const Contacts = () => {
           {translations.error}: {error}
         </Alert>
       )}
-      
+
       <Box
-        m="40px 0 0 0"
-        height="75vh"
+        m={isMobile ? "20px 0 0 0" : "40px 0 0 0"}
+        height={isMobile ? "calc(100vh - 200px)" : "75vh"}
         sx={{
           "& .MuiDataGrid-root": {
             border: "none",
