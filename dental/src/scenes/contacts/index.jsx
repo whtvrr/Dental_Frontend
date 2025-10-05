@@ -32,6 +32,8 @@ const Contacts = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [editFormData, setEditFormData] = useState({
     full_name: '',
     phone_number: '',
@@ -240,7 +242,7 @@ const Contacts = () => {
     setError(null);
     
     try {
-      const response = await api.get(`${API_CONFIG.ENDPOINTS.USERS.CLIENTS}?offset=${offset}&limit=${limit}`);
+      const response = await api.get(`${API_CONFIG.ENDPOINTS.USERS.CLIENTS}?offset=${offset}&limit=${limit}&q=${debouncedQuery}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -263,7 +265,16 @@ const Contacts = () => {
   useEffect(() => {
     fetchClients();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [offset]);
+  }, [offset, debouncedQuery]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
 
   const handleRowClick = (params) => {
     navigate(`/clients/${params.id}`);
@@ -276,6 +287,26 @@ const Contacts = () => {
           title={translations.contactsTitle}
           subtitle={translations.contactsSubtitle}
         />
+        <Box display="flex" gap={2} alignItems="center">
+        <TextField
+          variant="outlined"
+          size="small"
+          placeholder="Поиск клиентов..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{
+            minWidth: "300px",
+            backgroundColor: colors.primary[400],
+            input: { color: colors.grey[100] },
+            '& .MuiOutlinedInput-root fieldset': {
+              borderColor: colors.grey[300],
+            },
+            '& .MuiOutlinedInput-root:hover fieldset': {
+              borderColor: colors.greenAccent[400],
+            },
+          }}
+        />
+
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -290,6 +321,8 @@ const Contacts = () => {
           Добавить нового клиента
         </Button>
       </Box>
+    </Box>
+
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>

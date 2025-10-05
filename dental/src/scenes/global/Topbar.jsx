@@ -10,7 +10,6 @@ import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
-import SearchIcon from "@mui/icons-material/Search";
 
 const Topbar = () => {
     const theme = useTheme();
@@ -19,10 +18,7 @@ const Topbar = () => {
     const { user, logout } = useContext(AuthContext);
     const [anchorEl, setAnchorEl] = useState(null);
     const location = useLocation();
-
-    // Pages where search bar should be hidden
-    const hideSearchBarPages = ['/', '/registration', '/faq', '/calendar'];
-    
+        
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -55,20 +51,7 @@ const Topbar = () => {
     };
 
     return (
-    <Box display="flex" justifyContent={hideSearchBarPages.includes(location.pathname) ? "flex-end" : "space-between"} p={2}>
-    {/* Search Bar - Hidden on specific pages */}
-    {!hideSearchBarPages.includes(location.pathname) && (
-      <Box
-        display="flex"
-        backgroundColor={colors.primary[400]}
-        borderRadius="3px"
-        >
-          <InputBase sx = {{ml: 2, flex:1}} placeholder = "Поиск"/>
-          <IconButton type = "button" sx = {{p:1}}>
-            <SearchIcon/>
-          </IconButton>
-        </Box>
-    )}
+    <Box display="flex" justifyContent="space-between" p={2}>
         {/* ICONS */}
     <Box display="flex" alignItems="center" gap={1}>
         {/* User Info */}
