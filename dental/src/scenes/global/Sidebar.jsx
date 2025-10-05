@@ -60,6 +60,10 @@ const Sidebar = () => {
         "& .pro-menu-item.active": {
           color: "#6870fa !important",
         },
+        "& .pro-sidebar": {
+          width: "300px !important",
+          minWidth: "300px !important",
+        },
       }}
     >
       <ProSidebar collapsed={isCollapsed}>
@@ -81,7 +85,7 @@ const Sidebar = () => {
                 ml="15px"
               >
                 <Typography variant="h3" color={colors.grey[100]}>
-                  ADMINIS
+                  Dental
                 </Typography>
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                   <MenuOutlinedIcon />

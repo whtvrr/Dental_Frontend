@@ -4,6 +4,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  DialogContentText,
   Button,
   Typography,
   Box,
@@ -15,7 +16,13 @@ import {
   Paper,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  Modal,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -24,18 +31,23 @@ import {
   Person as PersonIcon,
   Comment as CommentIcon,
   MedicalServices as MedicalIcon,
-  ExpandMore as ExpandMoreIcon
+  ExpandMore as ExpandMoreIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon
 } from '@mui/icons-material';
 import { tokens } from '../theme';
 import { useApi } from '../hooks/useApi';
+import API_CONFIG from '../config/api';
 import DentalChart from './dental-chart/DentalChart';
+import { translations, translateStatus } from '../utils/translations';
 
 const AppointmentDetailsModal = ({
   open,
   onClose,
   appointment,
   clientName,
-  doctorName
+  doctorName,
+  onRefresh
 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -50,6 +62,19 @@ const AppointmentDetailsModal = ({
     treatment: null
   });
   const [medicalDataLoading, setMedicalDataLoading] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [clients, setClients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [editFormData, setEditFormData] = useState({
+    client_id: '',
+    doctor_id: '',
+    date_time: '',
+    duration_minutes: 30,
+    status: 'scheduled',
+    comment: ''
+  });
 
   useEffect(() => {
     if (open && appointment) {
@@ -66,8 +91,9 @@ const AppointmentDetailsModal = ({
 
       // Fetch appointment data immediately when modal opens
       fetchAppointmentData();
+      fetchClientsAndDoctors();
     }
-  }, [open, appointment]);
+  }, [open, appointment]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const convertFormulaToConditions = (formulaData) => {
     const conditions = {};
@@ -270,9 +296,9 @@ const AppointmentDetailsModal = ({
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Not specified';
+    if (!dateString) return translations.notSpecified;
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('ru-RU', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -280,12 +306,12 @@ const AppointmentDetailsModal = ({
   };
 
   const formatTime = (dateString) => {
-    if (!dateString) return 'Not specified';
+    if (!dateString) return translations.notSpecified;
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', {
+    return date.toLocaleTimeString('ru-RU', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: true
+      hour12: false
     });
   };
 
@@ -305,17 +331,95 @@ const AppointmentDetailsModal = ({
   };
 
   const getStatusText = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'confirmed':
-        return 'Confirmed';
-      case 'pending':
-        return 'Pending';
-      case 'cancelled':
-        return 'Cancelled';
-      case 'completed':
-        return 'Completed';
-      default:
-        return status || 'Unknown';
+    return translateStatus(status);
+  };
+
+  const fetchClientsAndDoctors = async () => {
+    try {
+      const [clientsResponse, doctorsResponse] = await Promise.all([
+        api.get(API_CONFIG.ENDPOINTS.USERS.CLIENTS + '?offset=0&limit=1000'),
+        api.get(API_CONFIG.ENDPOINTS.USERS.DOCTORS + '?offset=0&limit=1000')
+      ]);
+
+      if (clientsResponse.ok) {
+        const clientsData = await clientsResponse.json();
+        if (clientsData.status === 200 && clientsData.data && clientsData.data.clients) {
+          setClients(clientsData.data.clients);
+        }
+      }
+
+      if (doctorsResponse.ok) {
+        const doctorsData = await doctorsResponse.json();
+        if (doctorsData.status === 200 && doctorsData.data && doctorsData.data.doctors) {
+          setDoctors(doctorsData.data.doctors);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching clients and doctors:', error);
+    }
+  };
+
+  const handleEditClick = () => {
+    if (!appointment) return;
+
+    const dateTimeValue = new Date(appointment.date_time).toISOString().slice(0, 16);
+
+    setEditFormData({
+      client_id: appointment.client_id,
+      doctor_id: appointment.doctor_id,
+      date_time: dateTimeValue,
+      duration_minutes: appointment.duration_minutes,
+      status: appointment.status,
+      comment: appointment.comment || ''
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleEditSubmit = async () => {
+    if (!appointment) return;
+
+    try {
+      const formattedData = {
+        ...editFormData,
+        date_time: new Date(editFormData.date_time).toISOString()
+      };
+
+      const response = await api.put(`${API_CONFIG.ENDPOINTS.APPOINTMENTS.BASE}/${appointment.id}`, formattedData);
+
+      if (response.ok) {
+        setEditModalOpen(false);
+        if (onRefresh) onRefresh();
+        await fetchAppointmentData();
+      } else {
+        console.error('Failed to update appointment');
+      }
+    } catch (error) {
+      console.error('Error updating appointment:', error);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!appointment) return;
+
+    setDeleteLoading(true);
+    try {
+      const response = await api.delete(`${API_CONFIG.ENDPOINTS.APPOINTMENTS.BASE}/${appointment.id}`);
+
+      if (response.ok) {
+        setDeleteConfirmOpen(false);
+        if (onRefresh) onRefresh();
+        onClose();
+      } else {
+        console.error('Failed to delete appointment');
+      }
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -346,10 +450,10 @@ const AppointmentDetailsModal = ({
           <EventIcon sx={{ mr: 2, color: colors.blueAccent[400] }} />
           <Box>
             <Typography variant="h5">
-              Appointment Details
+              {translations.appointmentDetails}
             </Typography>
             <Typography variant="subtitle1" color={colors.grey[300]}>
-              {formatDate(appointment.date_time)} at {formatTime(appointment.date_time)}
+              {formatDate(appointment.date_time)}, {formatTime(appointment.date_time)}
             </Typography>
           </Box>
         </Box>
@@ -376,7 +480,7 @@ const AppointmentDetailsModal = ({
           borderRadius: 2
         }}>
           <Typography variant="h6" color={colors.grey[100]} gutterBottom>
-            Appointment Information
+            {translations.appointmentInformation}
           </Typography>
           <Divider sx={{ mb: 2, borderColor: colors.grey[600] }} />
 
@@ -384,7 +488,7 @@ const AppointmentDetailsModal = ({
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <CircularProgress sx={{ mb: 2 }} />
               <Typography variant="body1" color={colors.grey[400]}>
-                Loading appointment data...
+                {translations.loadingAppointments}
               </Typography>
             </Box>
           ) : (
@@ -394,7 +498,7 @@ const AppointmentDetailsModal = ({
                   <PersonIcon sx={{ color: colors.blueAccent[500], mr: 2 }} />
                   <Box>
                     <Typography variant="subtitle2" color={colors.grey[300]}>
-                      Client
+                      {translations.client}
                     </Typography>
                     <Typography variant="body1" color={colors.grey[100]}>
                       {clientName}
@@ -408,7 +512,7 @@ const AppointmentDetailsModal = ({
                   <PersonIcon sx={{ color: colors.greenAccent[500], mr: 2 }} />
                   <Box>
                     <Typography variant="subtitle2" color={colors.grey[300]}>
-                      Doctor
+                      {translations.doctor}
                     </Typography>
                     <Typography variant="body1" color={colors.grey[100]}>
                       {doctorName}
@@ -422,7 +526,7 @@ const AppointmentDetailsModal = ({
                   <EventIcon sx={{ color: colors.blueAccent[400], mr: 2 }} />
                   <Box>
                     <Typography variant="subtitle2" color={colors.grey[300]}>
-                      Date
+                      {translations.date}
                     </Typography>
                     <Typography variant="body1" color={colors.grey[100]}>
                       {formatDate(appointment.date_time)}
@@ -436,7 +540,7 @@ const AppointmentDetailsModal = ({
                   <ScheduleIcon sx={{ color: colors.redAccent[500], mr: 2 }} />
                   <Box>
                     <Typography variant="subtitle2" color={colors.grey[300]}>
-                      Time
+                      {translations.time}
                     </Typography>
                     <Typography variant="body1" color={colors.grey[100]}>
                       {formatTime(appointment.date_time)}
@@ -450,10 +554,10 @@ const AppointmentDetailsModal = ({
                   <ScheduleIcon sx={{ color: colors.blueAccent[300], mr: 2 }} />
                   <Box>
                     <Typography variant="subtitle2" color={colors.grey[300]}>
-                      Duration
+                      {translations.duration}
                     </Typography>
                     <Typography variant="body1" color={colors.grey[100]}>
-                      {appointment.duration_minutes || 'N/A'} minutes
+                      {appointment.duration_minutes || translations.notSpecified} {translations.minutes}
                     </Typography>
                   </Box>
                 </Box>
@@ -470,7 +574,7 @@ const AppointmentDetailsModal = ({
                   </Box>
                   <Box>
                     <Typography variant="subtitle2" color={colors.grey[300]}>
-                      Status
+                      {translations.status}
                     </Typography>
                   </Box>
                 </Box>
@@ -482,10 +586,10 @@ const AppointmentDetailsModal = ({
                   <MedicalIcon sx={{ color: colors.blueAccent[500], mr: 2, mt: 0.5 }} />
                   <Box>
                     <Typography variant="subtitle2" color={colors.grey[300]}>
-                      Anamnesis
+                      {translations.anamnesis}
                     </Typography>
                     <Typography variant="body1" color={colors.grey[100]}>
-                      {appointmentData?.anamnesis || 'Not specified'}
+                      {appointmentData?.anamnesis || translations.notSpecified}
                     </Typography>
                   </Box>
                 </Box>
@@ -497,10 +601,10 @@ const AppointmentDetailsModal = ({
                   <MedicalIcon sx={{ color: colors.greenAccent[500], mr: 2, mt: 0.5 }} />
                   <Box>
                     <Typography variant="subtitle2" color={colors.grey[300]}>
-                      Treatment
+                      {translations.treatment}
                     </Typography>
                     <Typography variant="body1" color={colors.grey[100]}>
-                      {medicalData.treatment?.title || 'Not specified'}
+                      {medicalData.treatment?.title || translations.notSpecified}
                     </Typography>
                     {medicalData.treatment?.description && medicalData.treatment.description !== medicalData.treatment.title && (
                       <Typography variant="body2" color={colors.grey[300]} sx={{ mt: 1, fontStyle: 'italic' }}>
@@ -517,10 +621,10 @@ const AppointmentDetailsModal = ({
                   <CommentIcon sx={{ color: colors.redAccent[500], mr: 2, mt: 0.5 }} />
                   <Box>
                     <Typography variant="subtitle2" color={colors.grey[300]}>
-                      Complaint
+                      {translations.complaint}
                     </Typography>
                     <Typography variant="body1" color={colors.grey[100]}>
-                      {medicalData.complaint?.title || 'Patient has no specific complaints at this time'}
+                      {medicalData.complaint?.title || translations.notSpecified}
                     </Typography>
                     {medicalData.complaint?.description && medicalData.complaint.description !== medicalData.complaint.title && (
                       <Typography variant="body2" color={colors.grey[300]} sx={{ mt: 1, fontStyle: 'italic' }}>
@@ -537,10 +641,10 @@ const AppointmentDetailsModal = ({
                   <MedicalIcon sx={{ color: colors.redAccent[400], mr: 2, mt: 0.5 }} />
                   <Box>
                     <Typography variant="subtitle2" color={colors.grey[300]}>
-                      Diagnosis
+                      {translations.diagnosis}
                     </Typography>
                     <Typography variant="body1" color={colors.grey[100]}>
-                      {medicalData.diagnosis?.title || 'Not specified'}
+                      {medicalData.diagnosis?.title || translations.notSpecified}
                     </Typography>
                     {medicalData.diagnosis?.description && medicalData.diagnosis.description !== medicalData.diagnosis.title && (
                       <Typography variant="body2" color={colors.grey[300]} sx={{ mt: 1, fontStyle: 'italic' }}>
@@ -557,7 +661,7 @@ const AppointmentDetailsModal = ({
                     <CommentIcon sx={{ color: colors.grey[400], mr: 2, mt: 0.5 }} />
                     <Box>
                       <Typography variant="subtitle2" color={colors.grey[300]}>
-                        Comments
+                        {translations.comments}
                       </Typography>
                       <Typography variant="body1" color={colors.grey[100]} sx={{ fontStyle: 'italic' }}>
                         "{appointment.comment}"
@@ -591,7 +695,7 @@ const AppointmentDetailsModal = ({
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <MedicalIcon sx={{ color: colors.blueAccent[400], mr: 1 }} />
               <Typography variant="h6" color={colors.grey[200]}>
-                Dental Chart
+                {translations.dentalChart}
               </Typography>
             </Box>
           </AccordionSummary>
@@ -600,7 +704,7 @@ const AppointmentDetailsModal = ({
               <Box sx={{ textAlign: 'center', py: 4 }}>
                 <CircularProgress sx={{ mb: 2 }} />
                 <Typography variant="body1" color={colors.grey[400]}>
-                  Loading dental chart...
+                  {translations.loadingDentalChart}
                 </Typography>
               </Box>
             ) : Object.keys(dentalChartData).length > 0 ? (
@@ -617,10 +721,10 @@ const AppointmentDetailsModal = ({
                   mb: 2
                 }} />
                 <Typography variant="h6" color={colors.grey[400]}>
-                  No dental chart data
+                  {translations.noDentalChart}
                 </Typography>
                 <Typography variant="body2" color={colors.grey[500]}>
-                  No dental formula found for this client.
+                  {translations.noDentalChartDesc}
                 </Typography>
               </Box>
             )}
@@ -631,8 +735,46 @@ const AppointmentDetailsModal = ({
       <DialogActions sx={{
         p: 3,
         backgroundColor: colors.primary[500],
-        borderTop: `1px solid ${colors.grey[600]}`
+        borderTop: `1px solid ${colors.grey[600]}`,
+        display: 'flex',
+        justifyContent: 'space-between'
       }}>
+        <Box display="flex" gap={2}>
+          {/* Edit button - only show for scheduled/confirmed appointments */}
+          {appointment && (appointment.status === 'scheduled' || appointment.status === 'confirmed') && (
+            <Button
+              onClick={handleEditClick}
+              variant="contained"
+              startIcon={<EditIcon />}
+              sx={{
+                backgroundColor: colors.blueAccent[600],
+                color: colors.grey[100],
+                '&:hover': {
+                  backgroundColor: colors.blueAccent[700]
+                }
+              }}
+            >
+              {translations.edit}
+            </Button>
+          )}
+
+          {/* Delete button */}
+          <Button
+            onClick={handleDeleteClick}
+            variant="contained"
+            startIcon={<DeleteIcon />}
+            sx={{
+              backgroundColor: colors.redAccent[700],
+              color: colors.grey[100],
+              '&:hover': {
+                backgroundColor: colors.redAccent[800]
+              }
+            }}
+          >
+            {translations.delete}
+          </Button>
+        </Box>
+
         <Button
           onClick={onClose}
           variant="outlined"
@@ -645,9 +787,237 @@ const AppointmentDetailsModal = ({
             }
           }}
         >
-          Close
+          {translations.close}
         </Button>
       </DialogActions>
+
+      {/* Edit Appointment Modal */}
+      <Modal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        aria-labelledby="edit-appointment-modal"
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 500,
+            bgcolor: colors.primary[400],
+            border: `2px solid ${colors.grey[100]}`,
+            borderRadius: '8px',
+            boxShadow: 24,
+            p: 4,
+            maxHeight: '90vh',
+            overflow: 'auto'
+          }}
+        >
+          <Typography variant="h4" component="h2" mb={3} color={colors.grey[100]}>
+            {translations.editAppointment}
+          </Typography>
+
+          <Box component="form" noValidate sx={{ mt: 1 }}>
+            <FormControl fullWidth margin="normal" required>
+              <InputLabel sx={{ color: colors.grey[100] }}>{translations.selectClient}</InputLabel>
+              <Select
+                value={editFormData.client_id}
+                onChange={(e) => setEditFormData({ ...editFormData, client_id: e.target.value })}
+                label={translations.selectClient}
+                sx={{
+                  color: colors.grey[100],
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.grey[300] },
+                  '& .MuiSvgIcon-root': { color: colors.grey[100] },
+                }}
+              >
+                {clients.map((client) => (
+                  <MenuItem key={client.id} value={client.id}>{client.full_name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth margin="normal" required>
+              <InputLabel sx={{ color: colors.grey[100] }}>{translations.selectDoctor}</InputLabel>
+              <Select
+                value={editFormData.doctor_id}
+                onChange={(e) => setEditFormData({ ...editFormData, doctor_id: e.target.value })}
+                label={translations.selectDoctor}
+                sx={{
+                  color: colors.grey[100],
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.grey[300] },
+                  '& .MuiSvgIcon-root': { color: colors.grey[100] },
+                }}
+              >
+                {doctors.map((doctor) => (
+                  <MenuItem key={doctor.id} value={doctor.id}>{doctor.full_name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label={translations.dateTime}
+              type="datetime-local"
+              value={editFormData.date_time}
+              onChange={(e) => setEditFormData({ ...editFormData, date_time: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: colors.grey[100],
+                  '& fieldset': { borderColor: colors.grey[300] },
+                },
+                '& .MuiInputLabel-root': { color: colors.grey[100] },
+              }}
+            />
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label={translations.durationMinutes}
+              type="number"
+              value={editFormData.duration_minutes}
+              onChange={(e) => setEditFormData({ ...editFormData, duration_minutes: parseInt(e.target.value) })}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: colors.grey[100],
+                  '& fieldset': { borderColor: colors.grey[300] },
+                },
+                '& .MuiInputLabel-root': { color: colors.grey[100] },
+              }}
+            />
+
+            <TextField
+              margin="normal"
+              fullWidth
+              label={translations.comment}
+              multiline
+              rows={3}
+              value={editFormData.comment}
+              onChange={(e) => setEditFormData({ ...editFormData, comment: e.target.value })}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: colors.grey[100],
+                  '& fieldset': { borderColor: colors.grey[300] },
+                },
+                '& .MuiInputLabel-root': { color: colors.grey[100] },
+              }}
+            />
+
+            <FormControl fullWidth margin="normal">
+              <InputLabel sx={{ color: colors.grey[100] }}>{translations.status}</InputLabel>
+              <Select
+                value={editFormData.status}
+                label={translations.status}
+                onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                sx={{
+                  color: colors.grey[100],
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.grey[300] },
+                  '& .MuiSvgIcon-root': { color: colors.grey[100] },
+                }}
+              >
+                <MenuItem value="scheduled">{translations.scheduled}</MenuItem>
+                <MenuItem value="confirmed">{translations.confirmed}</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Box display="flex" justifyContent="space-between" mt={3}>
+              <Button
+                variant="outlined"
+                onClick={() => setEditModalOpen(false)}
+                sx={{
+                  color: colors.grey[100],
+                  borderColor: colors.grey[400],
+                  "&:hover": { borderColor: colors.grey[100], backgroundColor: colors.grey[900] },
+                }}
+              >
+                {translations.cancel}
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleEditSubmit}
+                sx={{
+                  backgroundColor: colors.greenAccent[600],
+                  color: colors.grey[100],
+                  "&:hover": { backgroundColor: colors.greenAccent[700] },
+                }}
+              >
+                {translations.saveChanges}
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        aria-labelledby="delete-dialog-title"
+        PaperProps={{
+          sx: {
+            backgroundColor: colors.primary[400],
+            border: `1px solid ${colors.grey[600]}`
+          }
+        }}
+      >
+        <DialogTitle id="delete-dialog-title" sx={{ color: colors.grey[100] }}>
+          {translations.deleteAppointment}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: colors.grey[300] }}>
+            {translations.deleteAppointmentConfirm}
+            {appointment && (
+              <Box sx={{ mt: 2, p: 2, backgroundColor: colors.primary[500], borderRadius: 1 }}>
+                <Typography variant="body2" color={colors.grey[100]}>
+                  <strong>{translations.client}:</strong> {clientName}
+                </Typography>
+                <Typography variant="body2" color={colors.grey[100]}>
+                  <strong>{translations.doctor}:</strong> {doctorName}
+                </Typography>
+                <Typography variant="body2" color={colors.grey[100]}>
+                  <strong>{translations.dateTime}:</strong> {new Date(appointment.date_time).toLocaleString('ru-RU')}
+                </Typography>
+              </Box>
+            )}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button
+            onClick={() => setDeleteConfirmOpen(false)}
+            variant="outlined"
+            sx={{
+              color: colors.grey[100],
+              borderColor: colors.grey[400],
+              "&:hover": { borderColor: colors.grey[100], backgroundColor: colors.grey[900] },
+            }}
+          >
+            {translations.cancel}
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            disabled={deleteLoading}
+            sx={{
+              backgroundColor: colors.redAccent[600],
+              color: colors.grey[100],
+              "&:hover": { backgroundColor: colors.redAccent[700] },
+              "&:disabled": { backgroundColor: colors.grey[500], color: colors.grey[300] },
+            }}
+          >
+            {deleteLoading ? (
+              <Box display="flex" alignItems="center" gap={1}>
+                <CircularProgress size={20} color="inherit" />
+                {translations.deleting}
+              </Box>
+            ) : (
+              translations.deleteAppointment
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 };

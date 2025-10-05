@@ -38,6 +38,7 @@ import { useApi } from '../../hooks/useApi';
 import API_CONFIG from '../../config/api';
 import DentalChart from '../../components/dental-chart/DentalChart';
 import AppointmentDetailsModal from '../../components/AppointmentDetailsModal';
+import { translations, translateGender, translateStatus } from '../../utils/translations';
 
 const ClientDetail = () => {
   const theme = useTheme();
@@ -180,9 +181,9 @@ const ClientDetail = () => {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Not specified';
+    if (!dateString) return translations.notSpecified;
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('ru-RU', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -277,21 +278,21 @@ const ClientDetail = () => {
 
   const getClientName = (clientId) => {
     const client = clients.find(c => c.id === clientId);
-    return client ? client.full_name : `Client ${clientId.slice(-4)}`;
+    return client ? client.full_name : `${translations.client} ${clientId.slice(-4)}`;
   };
 
   const getDoctorName = (doctorId) => {
     const doctor = doctors.find(d => d.id === doctorId);
-    return doctor ? doctor.full_name : `Doctor ${doctorId.slice(-4)}`;
+    return doctor ? doctor.full_name : `${translations.doctor} ${doctorId.slice(-4)}`;
   };
 
   const formatTime = (dateTimeString) => {
-    if (!dateTimeString) return 'Not specified';
+    if (!dateTimeString) return translations.notSpecified;
     const date = new Date(dateTimeString);
-    return date.toLocaleTimeString('en-US', {
+    return date.toLocaleTimeString('ru-RU', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: true
+      hour12: false
     });
   };
 
@@ -311,18 +312,7 @@ const ClientDetail = () => {
   };
 
   const getStatusText = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'confirmed':
-        return 'Confirmed';
-      case 'pending':
-        return 'Pending';
-      case 'cancelled':
-        return 'Cancelled';
-      case 'completed':
-        return 'Completed';
-      default:
-        return status || 'Unknown';
-    }
+    return translateStatus(status);
   };
 
   if (loading) {
@@ -330,7 +320,7 @@ const ClientDetail = () => {
       <Box m="20px" display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
         <CircularProgress />
         <Typography variant="h6" sx={{ ml: 2, color: colors.grey[100] }}>
-          Loading client details...
+          {translations.loadingClientDetails}
         </Typography>
       </Box>
     );
@@ -339,16 +329,16 @@ const ClientDetail = () => {
   if (error) {
     return (
       <Box m="20px">
-        <Header title="CLIENT DETAILS" subtitle="Detailed client information" />
+        <Header title={translations.clientDetails} subtitle={translations.clientInfo} />
         <Alert severity="error" sx={{ mt: 2 }}>
-          Error loading client details: {error}
+          {translations.error}: {error}
         </Alert>
         <Button
           startIcon={<ArrowBack />}
           onClick={handleBack}
           sx={{ mt: 2, color: colors.grey[100] }}
         >
-          Back to Clients
+          {translations.backToClients}
         </Button>
       </Box>
     );
@@ -357,16 +347,16 @@ const ClientDetail = () => {
   if (!client) {
     return (
       <Box m="20px">
-        <Header title="CLIENT DETAILS" subtitle="Detailed client information" />
+        <Header title={translations.clientDetails} subtitle={translations.clientInfo} />
         <Alert severity="warning" sx={{ mt: 2 }}>
-          Client not found
+          {translations.noDataFound}
         </Alert>
         <Button
           startIcon={<ArrowBack />}
           onClick={handleBack}
           sx={{ mt: 2, color: colors.grey[100] }}
         >
-          Back to Clients
+          {translations.backToClients}
         </Button>
       </Box>
     );
@@ -375,9 +365,9 @@ const ClientDetail = () => {
   return (
     <Box m="20px">
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Header 
-          title="CLIENT DETAILS" 
-          subtitle={`Detailed information for ${client.full_name}`} 
+        <Header
+          title={translations.clientDetails}
+          subtitle={`${translations.clientInfo}: ${client.full_name}`}
         />
         <Box display="flex" gap={2}>
           <Button
@@ -393,7 +383,7 @@ const ClientDetail = () => {
               },
             }}
           >
-            Back to Clients
+            {translations.backToClients}
           </Button>
           <Button
             startIcon={<Edit />}
@@ -406,7 +396,7 @@ const ClientDetail = () => {
               },
             }}
           >
-            Edit Client
+            {translations.editClient}
           </Button>
         </Box>
       </Box>
@@ -431,7 +421,7 @@ const ClientDetail = () => {
                 {client.full_name}
               </Typography>
               <Chip
-                label={client.role?.toUpperCase() || 'CLIENT'}
+                label={client.role?.toUpperCase() || translations.client.toUpperCase()}
                 color="primary"
                 size="small"
                 sx={{ mt: 1 }}
@@ -447,10 +437,10 @@ const ClientDetail = () => {
                 <Phone sx={{ color: colors.blueAccent[500], mr: 2 }} />
                 <Box>
                   <Typography variant="subtitle2" color={colors.grey[300]}>
-                    Phone Number
+                    {translations.phoneNumber}
                   </Typography>
                   <Typography variant="body1" color={colors.grey[100]}>
-                    {client.phone_number || 'Not specified'}
+                    {client.phone_number || translations.notSpecified}
                   </Typography>
                 </Box>
               </Box>
@@ -461,10 +451,10 @@ const ClientDetail = () => {
                 <LocationOn sx={{ color: colors.redAccent[500], mr: 2 }} />
                 <Box>
                   <Typography variant="subtitle2" color={colors.grey[300]}>
-                    Address
+                    {translations.address}
                   </Typography>
                   <Typography variant="body1" color={colors.grey[100]}>
-                    {client.address || 'Not specified'}
+                    {client.address || translations.notSpecified}
                   </Typography>
                 </Box>
               </Box>
@@ -475,13 +465,12 @@ const ClientDetail = () => {
                 <Person sx={{ color: colors.greenAccent[500], mr: 2 }} />
                 <Box>
                   <Typography variant="subtitle2" color={colors.grey[300]}>
-                    Gender
+                    {translations.gender}
                   </Typography>
                   <Chip
-                    label={client.gender?.toUpperCase() || 'Not specified'}
+                    label={translateGender(client.gender)}
                     color={client.gender === 'male' ? 'primary' : client.gender === 'female' ? 'secondary' : 'default'}
                     size="small"
-                    sx={{ textTransform: 'capitalize' }}
                   />
                 </Box>
               </Box>
@@ -492,13 +481,13 @@ const ClientDetail = () => {
                 <Cake sx={{ color: colors.blueAccent[400], mr: 2 }} />
                 <Box>
                   <Typography variant="subtitle2" color={colors.grey[300]}>
-                    Birth Date
+                    {translations.birthDate}
                   </Typography>
                   <Typography variant="body1" color={colors.grey[100]}>
                     {formatDate(client.birth_date)}
                     {client.birth_date && (
                       <Typography variant="body2" color={colors.grey[300]} component="span" sx={{ ml: 1 }}>
-                        (Age: {calculateAge(client.birth_date)})
+                        ({translations.age}: {calculateAge(client.birth_date)})
                       </Typography>
                     )}
                   </Typography>
@@ -528,17 +517,17 @@ const ClientDetail = () => {
             }}
           >
             <Tab
-              label="Overview"
+              label={translations.overview}
               icon={<Person />}
               iconPosition="start"
             />
             <Tab
-              label="Appointments"
+              label={translations.appointments}
               icon={<EventIcon />}
               iconPosition="start"
             />
             <Tab
-              label="Dental Chart"
+              label={translations.dentalChart}
               icon={<MedicalIcon />}
               iconPosition="start"
             />
@@ -550,10 +539,10 @@ const ClientDetail = () => {
           {activeTab === 0 && (
             <Box>
               <Typography variant="h6" color={colors.grey[100]} gutterBottom>
-                Client Overview
+                {translations.overview}
               </Typography>
               <Typography variant="body2" color={colors.grey[300]}>
-                Complete client information is displayed above. Use the tabs to view appointments and dental chart.
+                Полная информация о клиенте отображается выше. Используйте вкладки для просмотра записей и зубной карты.
               </Typography>
             </Box>
           )}
@@ -561,23 +550,23 @@ const ClientDetail = () => {
           {activeTab === 1 && (
             <Box>
               <Typography variant="h6" color={colors.grey[100]} gutterBottom>
-                Appointments History
+                {translations.appointmentsHistory}
               </Typography>
               {appointmentsLoading ? (
                 <Box sx={{ textAlign: 'center', py: 4 }}>
                   <CircularProgress sx={{ mb: 2 }} />
                   <Typography variant="body1" color={colors.grey[400]}>
-                    Loading appointments...
+                    {translations.loadingAppointments}
                   </Typography>
                 </Box>
               ) : appointments.length === 0 ? (
                 <Box sx={{ textAlign: 'center', py: 4 }}>
                   <EventIcon sx={{ fontSize: 64, color: colors.grey[500], mb: 2 }} />
                   <Typography variant="h6" color={colors.grey[400]}>
-                    No appointments found
+                    {translations.noAppointments}
                   </Typography>
                   <Typography variant="body2" color={colors.grey[500]}>
-                    This client has no scheduled appointments.
+                    {translations.noAppointmentsDesc}
                   </Typography>
                 </Box>
               ) : (
@@ -618,7 +607,7 @@ const ClientDetail = () => {
                           secondary={
                             <Box sx={{ mt: 1 }}>
                               <Typography variant="body2" color={colors.grey[300]}>
-                                Duration: {appointment.duration_minutes || 'N/A'} minutes
+                                {translations.duration}: {appointment.duration_minutes || translations.notSpecified} {translations.minutes}
                               </Typography>
                               {appointment.comment && (
                                 <Typography variant="body2" color={colors.grey[400]} sx={{ mt: 0.5, fontStyle: 'italic' }}>
@@ -639,13 +628,13 @@ const ClientDetail = () => {
           {activeTab === 2 && (
             <Box>
               <Typography variant="h6" color={colors.grey[100]} gutterBottom>
-                Dental Chart
+                {translations.dentalChart}
               </Typography>
               {formulaLoading ? (
                 <Box sx={{ textAlign: 'center', py: 4 }}>
                   <CircularProgress sx={{ mb: 2 }} />
                   <Typography variant="body1" color={colors.grey[400]}>
-                    Loading dental chart...
+                    {translations.loadingDentalChart}
                   </Typography>
                 </Box>
               ) : Object.keys(toothConditions).length > 0 ? (
@@ -662,10 +651,10 @@ const ClientDetail = () => {
                     mb: 2
                   }} />
                   <Typography variant="h6" color={colors.grey[400]}>
-                    No dental chart data
+                    {translations.noDentalChart}
                   </Typography>
                   <Typography variant="body2" color={colors.grey[500]}>
-                    No dental formula found for this client.
+                    {translations.noDentalChartDesc}
                   </Typography>
                 </Box>
               )}
@@ -681,6 +670,7 @@ const ClientDetail = () => {
         appointment={selectedAppointment}
         clientName={client?.full_name || 'Unknown Client'}
         doctorName={selectedAppointment ? getDoctorName(selectedAppointment.doctor_id) : ''}
+        onRefresh={fetchAppointments}
       />
     </Box>
   );

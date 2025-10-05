@@ -315,14 +315,14 @@ const Complaints = () => {
       </Box>
 
       {/* Add/Edit Dialog */}
-      <Dialog 
-        open={openDialog} 
+      <Dialog
+        open={openDialog}
         onClose={handleCloseDialog}
         maxWidth="sm"
         fullWidth
         PaperProps={{
           sx: {
-            backgroundColor: colors.primary[400],
+            backgroundColor: colors.primary[500],
             color: colors.grey[100]
           }
         }}
@@ -346,6 +346,7 @@ const Complaints = () => {
               mb: 2,
               '& .MuiOutlinedInput-root': {
                 backgroundColor: colors.primary[400],
+                color: colors.grey[100],
                 '& fieldset': {
                   borderColor: colors.grey[300],
                 },
@@ -375,6 +376,7 @@ const Complaints = () => {
               mb: 2,
               '& .MuiOutlinedInput-root': {
                 backgroundColor: colors.primary[400],
+                color: colors.grey[100],
                 '& fieldset': {
                   borderColor: colors.grey[300],
                 },
@@ -405,6 +407,7 @@ const Complaints = () => {
             sx={{
               '& .MuiOutlinedInput-root': {
                 backgroundColor: colors.primary[400],
+                color: colors.grey[100],
                 '& fieldset': {
                   borderColor: colors.grey[300],
                 },
@@ -443,12 +446,12 @@ const Complaints = () => {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog 
-        open={deleteConfirmOpen} 
+      <Dialog
+        open={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
         PaperProps={{
           sx: {
-            backgroundColor: colors.primary[400],
+            backgroundColor: colors.primary[500],
             color: colors.grey[100]
           }
         }}

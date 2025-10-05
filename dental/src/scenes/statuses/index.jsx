@@ -447,14 +447,14 @@ const Statuses = () => {
       </Box>
 
       {/* Add/Edit Dialog */}
-      <Dialog 
-        open={openDialog} 
+      <Dialog
+        open={openDialog}
         onClose={handleCloseDialog}
         maxWidth="sm"
         fullWidth
         PaperProps={{
           sx: {
-            backgroundColor: colors.primary[400],
+            backgroundColor: colors.primary[500],
             color: colors.grey[100]
           }
         }}
@@ -478,6 +478,7 @@ const Statuses = () => {
               mb: 2,
               '& .MuiOutlinedInput-root': {
                 backgroundColor: colors.primary[400],
+                color: colors.grey[100],
                 '& fieldset': {
                   borderColor: colors.grey[300],
                 },
@@ -494,13 +495,14 @@ const Statuses = () => {
             }}
           />
           
-          <FormControl 
-            fullWidth 
+          <FormControl
+            fullWidth
             margin="dense"
             sx={{
               mb: 2,
               '& .MuiOutlinedInput-root': {
                 backgroundColor: colors.primary[400],
+                color: colors.grey[100],
                 '& fieldset': {
                   borderColor: colors.grey[300],
                 },
@@ -542,6 +544,7 @@ const Statuses = () => {
               mb: 2,
               '& .MuiOutlinedInput-root': {
                 backgroundColor: colors.primary[400],
+                color: colors.grey[100],
                 '& fieldset': {
                   borderColor: colors.grey[300],
                 },
@@ -570,6 +573,7 @@ const Statuses = () => {
                 flex: 1,
                 '& .MuiOutlinedInput-root': {
                   backgroundColor: colors.primary[400],
+                  color: colors.grey[100],
                   '& fieldset': {
                     borderColor: colors.grey[300],
                   },
@@ -622,6 +626,7 @@ const Statuses = () => {
             sx={{
               '& .MuiOutlinedInput-root': {
                 backgroundColor: colors.primary[400],
+                color: colors.grey[100],
                 '& fieldset': {
                   borderColor: colors.grey[300],
                 },
@@ -660,12 +665,12 @@ const Statuses = () => {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog 
-        open={deleteConfirmOpen} 
+      <Dialog
+        open={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
         PaperProps={{
           sx: {
-            backgroundColor: colors.primary[400],
+            backgroundColor: colors.primary[500],
             color: colors.grey[100]
           }
         }}

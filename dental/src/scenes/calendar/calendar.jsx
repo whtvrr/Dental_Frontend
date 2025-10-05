@@ -5,6 +5,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import { formatDate } from "@fullcalendar/core";
+import ruLocale from '@fullcalendar/core/locales/ru';
 import {
   Box,
   List,
@@ -40,6 +41,7 @@ import { tokens } from "../../theme";
 import { AuthContext } from "../../context/AuthContext";
 import ApiClient from "../../utils/apiClient";
 import DentalChart from "../../components/dental-chart/DentalChart";
+import { translations, translateStatus } from "../../utils/translations";
 
 const Calendar = () => {
   const theme = useTheme();
@@ -66,6 +68,17 @@ const Calendar = () => {
   const [detailLoading, setDetailLoading] = useState(false);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    client_id: '',
+    doctor_id: '',
+    date_time: '',
+    duration_minutes: 30,
+    status: 'scheduled',
+    comment: ''
+  });
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [completeLoading, setCompleteLoading] = useState(false);
   const [complaints, setComplaints] = useState([]);
@@ -421,6 +434,75 @@ const Calendar = () => {
     setCancelConfirmOpen(false);
   };
 
+  const handleEditAppointmentClick = () => {
+    if (!selectedAppointment) return;
+
+    // Format date_time for datetime-local input
+    const dateTimeValue = new Date(selectedAppointment.date_time).toISOString().slice(0, 16);
+
+    setEditFormData({
+      client_id: selectedAppointment.client_id,
+      doctor_id: selectedAppointment.doctor_id,
+      date_time: dateTimeValue,
+      duration_minutes: selectedAppointment.duration_minutes,
+      status: selectedAppointment.status,
+      comment: selectedAppointment.comment || ''
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleEditAppointmentSubmit = async () => {
+    if (!selectedAppointment) return;
+
+    try {
+      const formattedData = {
+        ...editFormData,
+        date_time: new Date(editFormData.date_time).toISOString()
+      };
+
+      const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.APPOINTMENTS.BASE}/${selectedAppointment.id}`, formattedData);
+
+      if (response.ok) {
+        setEditModalOpen(false);
+        await fetchAppointments();
+        await fetchAppointmentDetail(selectedAppointment.id);
+      } else {
+        const data = await response.json();
+        setError(data.message || 'Failed to update appointment');
+      }
+    } catch (error) {
+      console.error('Error updating appointment:', error);
+      setError('Network error. Please try again.');
+    }
+  };
+
+  const handleDeleteAppointmentClick = () => {
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteAppointmentConfirm = async () => {
+    if (!selectedAppointment) return;
+
+    setDeleteLoading(true);
+    try {
+      const response = await apiClient.delete(`${API_CONFIG.ENDPOINTS.APPOINTMENTS.BASE}/${selectedAppointment.id}`);
+
+      if (response.ok) {
+        setDeleteConfirmOpen(false);
+        handleCloseDetailModal();
+        await fetchAppointments();
+      } else {
+        const data = await response.json();
+        setError(data.message || 'Failed to delete appointment');
+      }
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+      setError('Network error. Please try again.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   const handleCompleteAppointmentClick = async () => {
     // Load complaints and statuses when opening complete modal
     await fetchComplaintsAndStatuses();
@@ -591,13 +673,13 @@ const Calendar = () => {
   const handleSubmitAppointment = async () => {
     try {
       const token = sessionStorage.getItem('access_token');
-      
+
       // Convert datetime-local to ISO string format expected by backend
       const formattedData = {
         ...appointmentData,
         date_time: new Date(appointmentData.date_time).toISOString()
       };
-      
+
       const response = await fetch(buildApiUrl('/appointments'), {
         method: 'POST',
         headers: {
@@ -610,10 +692,10 @@ const Calendar = () => {
       if (response.ok) {
         const result = await response.json();
         console.log('Appointment created successfully:', result);
-        
+
         // Refresh appointments after successful creation
         await fetchAppointments();
-        
+
         handleCloseModal();
       } else {
         console.error('Failed to create appointment');
@@ -625,7 +707,7 @@ const Calendar = () => {
 
   return (
     <Box m="20px">
-      <Header title="Calendar" subtitle="Full Calendar Interactive Page" />
+      <Header title={translations.calendarTitle} subtitle={translations.calendarSubtitle} />
 
       <Box display="flex" justifyContent="space-between">
         {/* CALENDAR SIDEBAR */}
@@ -635,7 +717,7 @@ const Calendar = () => {
           p="15px"
           borderRadius="4px"
         >
-          <Typography variant="h5">Upcoming Appointments</Typography>
+          <Typography variant="h5">{translations.upcomingAppointments}</Typography>
           {appointmentsLoading ? (
             <Box display="flex" justifyContent="center" p={2}>
               <CircularProgress size={24} />
@@ -707,7 +789,7 @@ const Calendar = () => {
                 },
               }}
             >
-              New Appointment
+              {translations.newAppointment}
             </Button>
           </Box>
 
@@ -737,13 +819,21 @@ const Calendar = () => {
             datesSet={handleDatesSet}
             events={calendarEvents}
             loading={appointmentsLoading}
+            locale={ruLocale}
+            buttonText={{
+              today: translations.today,
+              month: translations.month,
+              week: translations.week,
+              day: translations.day,
+              list: translations.list
+            }}
             eventDidMount={(info) => {
               // Add status badge to events
               const statusBadge = document.createElement('div');
               statusBadge.style.fontSize = '10px';
               statusBadge.style.opacity = '0.8';
               statusBadge.style.fontWeight = 'bold';
-              statusBadge.textContent = info.event.extendedProps.status.toUpperCase();
+              statusBadge.textContent = translateStatus(info.event.extendedProps.status).toUpperCase();
               info.el.appendChild(statusBadge);
             }}
           />
@@ -777,41 +867,41 @@ const Calendar = () => {
             mb={3}
             color={colors.grey[100]}
           >
-            New Appointment
+            {translations.newAppointment}
           </Typography>
-          
+
           <Box component="form" noValidate sx={{ mt: 1 }}>
             {error && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
               </Alert>
             )}
-            
+
             {loading ? (
               <Box display="flex" justifyContent="center" alignItems="center" p={3}>
                 <CircularProgress />
                 <Typography variant="body1" sx={{ ml: 2, color: colors.grey[100] }}>
-                  Loading clients and doctors...
+                  {translations.loadingClientsAndDoctors}
                 </Typography>
               </Box>
             ) : (
               <>
                 <Box display="flex" alignItems="center" gap={1} mt={2}>
-                  <FormControl 
-                    fullWidth 
+                  <FormControl
+                    fullWidth
                     margin="normal"
                     required
                     error={!appointmentData.client_id}
                   >
-                    <InputLabel 
+                    <InputLabel
                       sx={{ color: colors.grey[100] }}
                     >
-                      Select Client
+                      {translations.selectClient}
                     </InputLabel>
                     <Select
                       value={appointmentData.client_id}
                       onChange={(e) => handleInputChange('client_id', e.target.value)}
-                      label="Select Client"
+                      label={translations.selectClient}
                       sx={{
                         color: colors.grey[100],
                         '& .MuiOutlinedInput-notchedOutline': {
@@ -823,7 +913,7 @@ const Calendar = () => {
                       }}
                     >
                       <MenuItem value="">
-                        <em>Choose a client</em>
+                        <em>{translations.chooseClient}</em>
                       </MenuItem>
                       {clients.map((client) => (
                         <MenuItem key={client.id} value={client.id}>
@@ -840,7 +930,7 @@ const Calendar = () => {
                     </Select>
                   </FormControl>
                   
-                  <Tooltip title="Add New Client">
+                  <Tooltip title={translations.addNewClient}>
                     <IconButton
                       onClick={handleOpenClientModal}
                       sx={{
@@ -858,21 +948,21 @@ const Calendar = () => {
                   </Tooltip>
                 </Box>
 
-                <FormControl 
-                  fullWidth 
+                <FormControl
+                  fullWidth
                   margin="normal"
                   required
                   error={!appointmentData.doctor_id}
                 >
-                  <InputLabel 
+                  <InputLabel
                     sx={{ color: colors.grey[100] }}
                   >
-                    Select Doctor
+                    {translations.selectDoctor}
                   </InputLabel>
                   <Select
                     value={appointmentData.doctor_id}
                     onChange={(e) => handleInputChange('doctor_id', e.target.value)}
-                    label="Select Doctor"
+                    label={translations.selectDoctor}
                     sx={{
                       color: colors.grey[100],
                       '& .MuiOutlinedInput-notchedOutline': {
@@ -884,7 +974,7 @@ const Calendar = () => {
                     }}
                   >
                     <MenuItem value="">
-                      <em>Choose a doctor</em>
+                      <em>{translations.chooseDoctor}</em>
                     </MenuItem>
                     {doctors.map((doctor) => (
                       <MenuItem key={doctor.id} value={doctor.id}>
@@ -908,7 +998,7 @@ const Calendar = () => {
               required
               fullWidth
               id="date_time"
-              label="Date & Time"
+              label={translations.dateTime}
               name="date_time"
               type="datetime-local"
               value={appointmentData.date_time}
@@ -934,7 +1024,7 @@ const Calendar = () => {
               required
               fullWidth
               id="duration_minutes"
-              label="Duration (minutes)"
+              label={translations.durationMinutes}
               name="duration_minutes"
               type="number"
               value={appointmentData.duration_minutes}
@@ -951,12 +1041,12 @@ const Calendar = () => {
                 },
               }}
             />
-            
+
             <TextField
               margin="normal"
               fullWidth
               id="comment"
-              label="Comment"
+              label={translations.comment}
               name="comment"
               multiline
               rows={3}
@@ -974,19 +1064,19 @@ const Calendar = () => {
                 },
               }}
             />
-            
+
             <FormControl fullWidth margin="normal">
-              <InputLabel 
+              <InputLabel
                 id="status-label"
                 sx={{ color: colors.grey[100] }}
               >
-                Status
+                {translations.status}
               </InputLabel>
               <Select
                 labelId="status-label"
                 id="status"
                 value={appointmentData.status}
-                label="Status"
+                label={translations.status}
                 onChange={(e) => handleInputChange('status', e.target.value)}
                 sx={{
                   color: colors.grey[100],
@@ -998,13 +1088,13 @@ const Calendar = () => {
                   },
                 }}
               >
-                <MenuItem value="scheduled">Scheduled</MenuItem>
-                <MenuItem value="confirmed">Confirmed</MenuItem>
-                <MenuItem value="canceled">canceled</MenuItem>
-                <MenuItem value="completed">Completed</MenuItem>
+                <MenuItem value="scheduled">{translations.scheduled}</MenuItem>
+                <MenuItem value="confirmed">{translations.confirmed}</MenuItem>
+                <MenuItem value="canceled">{translations.canceled}</MenuItem>
+                <MenuItem value="completed">{translations.completed}</MenuItem>
               </Select>
             </FormControl>
-            
+
             <Box display="flex" justifyContent="space-between" mt={3}>
               <Button
                 variant="outlined"
@@ -1018,7 +1108,7 @@ const Calendar = () => {
                   },
                 }}
               >
-                Cancel
+                {translations.cancel}
               </Button>
               <Button
                 variant="contained"
@@ -1036,7 +1126,7 @@ const Calendar = () => {
                   },
                 }}
               >
-                Create Appointment
+                {translations.createAppointment}
               </Button>
             </Box>
           </Box>
@@ -1290,23 +1380,23 @@ const Calendar = () => {
             mb={3}
             color={colors.grey[100]}
           >
-            Appointment Details
+            {translations.appointmentDetails}
           </Typography>
-          
+
           {detailLoading ? (
             <Box display="flex" justifyContent="center" alignItems="center" p={3}>
               <CircularProgress />
               <Typography variant="body1" sx={{ ml: 2, color: colors.grey[100] }}>
-                Loading appointment details...
+                {translations.loadingAppointments}
               </Typography>
             </Box>
           ) : selectedAppointment ? (
             <Box>
               <Grid container spacing={3}>
                 {/* Client Information */}
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
                   <Typography variant="h6" color={colors.greenAccent[400]} gutterBottom>
-                    Client Information
+                    {translations.clientInfo}
                   </Typography>
                   <Box sx={{ bgcolor: colors.primary[500], p: 2, borderRadius: 1, mb: 2 }}>
                     <Grid container spacing={2}>
@@ -1361,9 +1451,9 @@ const Calendar = () => {
                 </Grid>
 
                 {/* Doctor Information */}
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
                   <Typography variant="h6" color={colors.blueAccent[400]} gutterBottom>
-                    Doctor Information
+                    {translations.doctor}
                   </Typography>
                   <Box sx={{ bgcolor: colors.primary[500], p: 2, borderRadius: 1, mb: 2 }}>
                     <Grid container spacing={2}>
@@ -1437,14 +1527,6 @@ const Calendar = () => {
                           {selectedAppointment.status}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Typography variant="subtitle2" color={colors.grey[300]}>
-                          Created
-                        </Typography>
-                        <Typography variant="body1" color={colors.grey[100]}>
-                          {new Date(selectedAppointment.created_at).toLocaleDateString()}
-                        </Typography>
-                      </Grid>
                       {selectedAppointment.comment && (
                         <Grid item xs={12}>
                           <Typography variant="subtitle2" color={colors.grey[300]}>
@@ -1466,18 +1548,57 @@ const Calendar = () => {
             </Typography>
           )}
           
-          <Box display="flex" justifyContent="space-between" alignItems="center" mt={3}>
-            <Box display="flex" gap={2}>
+          <Box display="flex" flexDirection="column" gap={2} mt={3}>
+            {/* Action buttons row 1 */}
+            <Box display="flex" gap={1} flexWrap="wrap">
+              {/* Edit button - only show for scheduled/confirmed appointments */}
+              {selectedAppointment &&
+               (selectedAppointment.status === 'scheduled' || selectedAppointment.status === 'confirmed') && (
+                <Button
+                  variant="contained"
+                  onClick={handleEditAppointmentClick}
+                  size="small"
+                  sx={{
+                    backgroundColor: colors.blueAccent[600],
+                    color: colors.grey[100],
+                    "&:hover": {
+                      backgroundColor: colors.blueAccent[700],
+                    },
+                  }}
+                >
+                  Edit
+                </Button>
+              )}
+
+              {/* Delete button - always available */}
+              {selectedAppointment && (
+                <Button
+                  variant="contained"
+                  onClick={handleDeleteAppointmentClick}
+                  size="small"
+                  sx={{
+                    backgroundColor: colors.redAccent[700],
+                    color: colors.grey[100],
+                    "&:hover": {
+                      backgroundColor: colors.redAccent[800],
+                    },
+                  }}
+                >
+                  Delete
+                </Button>
+              )}
+
               {/* Cancel button - only show if not already canceled or completed */}
-              {selectedAppointment && 
-               selectedAppointment.status !== 'canceled' && 
-               selectedAppointment.status !== 'completed' && 
-               selectedAppointment.status?.toLowerCase() !== 'canceled' && 
+              {selectedAppointment &&
+               selectedAppointment.status !== 'canceled' &&
+               selectedAppointment.status !== 'completed' &&
+               selectedAppointment.status?.toLowerCase() !== 'canceled' &&
                selectedAppointment.status?.toLowerCase() !== 'completed' && (
                 <Button
                   variant="contained"
                   onClick={handleCancelAppointmentClick}
                   disabled={cancelLoading}
+                  size="small"
                   sx={{
                     backgroundColor: colors.redAccent[600],
                     color: colors.grey[100],
@@ -1492,24 +1613,25 @@ const Calendar = () => {
                 >
                   {cancelLoading ? (
                     <Box display="flex" alignItems="center" gap={1}>
-                      <CircularProgress size={20} color="inherit" />
+                      <CircularProgress size={16} color="inherit" />
                       Canceling...
                     </Box>
                   ) : (
-                    'Cancel Appointment'
+                    'Cancel'
                   )}
                 </Button>
               )}
-              
+
               {/* Complete appointment button - only show if not canceled or completed */}
-              {selectedAppointment && 
-               selectedAppointment.status !== 'canceled' && 
-               selectedAppointment.status !== 'completed' && 
-               selectedAppointment.status?.toLowerCase() !== 'canceled' && 
+              {selectedAppointment &&
+               selectedAppointment.status !== 'canceled' &&
+               selectedAppointment.status !== 'completed' &&
+               selectedAppointment.status?.toLowerCase() !== 'canceled' &&
                selectedAppointment.status?.toLowerCase() !== 'completed' && (
                 <Button
                   variant="contained"
                   onClick={handleCompleteAppointmentClick}
+                  size="small"
                   sx={{
                     backgroundColor: colors.greenAccent[600],
                     color: colors.grey[100],
@@ -1518,50 +1640,55 @@ const Calendar = () => {
                     },
                   }}
                 >
-                  Complete Appointment
+                  Complete
                 </Button>
               )}
-              
+
               {/* Status indicator for canceled/completed appointments */}
-              {selectedAppointment && 
+              {selectedAppointment &&
                (selectedAppointment.status === 'canceled' || selectedAppointment.status === 'completed' ||
                 selectedAppointment.status?.toLowerCase() === 'canceled' || selectedAppointment.status?.toLowerCase() === 'completed') && (
-                <Box 
-                  sx={{ 
-                    px: 2, 
-                    py: 1, 
-                    borderRadius: 1, 
-                    backgroundColor: selectedAppointment.status === 'canceled' 
-                      ? colors.redAccent[600] 
+                <Button
+                  variant="contained"
+                  disabled
+                  size="small"
+                  sx={{
+                    backgroundColor: selectedAppointment.status === 'canceled'
+                      ? colors.redAccent[600]
                       : colors.grey[600],
-                    color: colors.grey[100]
+                    color: colors.grey[100],
+                    "&.Mui-disabled": {
+                      backgroundColor: selectedAppointment.status === 'canceled'
+                        ? colors.redAccent[600]
+                        : colors.grey[600],
+                      color: colors.grey[100],
+                      opacity: 1
+                    }
                   }}
                 >
-                  <Typography variant="body2" fontWeight="bold">
-                    {(selectedAppointment.status === 'canceled' || selectedAppointment.status?.toLowerCase() === 'canceled') ? 'canceled' : 'COMPLETED'}
-                  </Typography>
-                </Box>
+                  {(selectedAppointment.status === 'canceled' || selectedAppointment.status?.toLowerCase() === 'canceled') ? 'CANCELED' : 'COMPLETED'}
+                </Button>
               )}
             </Box>
-            
-            {/* Close button */}
-            <Button
-              variant="outlined"
-              onClick={handleCloseDetailModal}
-              sx={{
-                color: colors.grey[100],
-                borderColor: colors.grey[400],
-                ml: 2,
-                minWidth: '140px', // Match the width of other buttons
-                height: '36px', // Match the height of other buttons
-                "&:hover": {
-                  borderColor: colors.grey[100],
-                  backgroundColor: colors.grey[900],
-                },
-              }}
-            >
-              Close
-            </Button>
+
+            {/* Close button row 2 */}
+            <Box display="flex" justifyContent="flex-end">
+              <Button
+                variant="outlined"
+                onClick={handleCloseDetailModal}
+                size="small"
+                sx={{
+                  color: colors.grey[100],
+                  borderColor: colors.grey[400],
+                  "&:hover": {
+                    borderColor: colors.grey[100],
+                    backgroundColor: colors.grey[900],
+                  },
+                }}
+              >
+                Close
+              </Button>
+            </Box>
           </Box>
         </Box>
       </Modal>
@@ -1987,6 +2114,232 @@ const Calendar = () => {
             }}
           >
             Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Appointment Modal */}
+      <Modal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        aria-labelledby="edit-appointment-modal"
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 500,
+            bgcolor: colors.primary[400],
+            border: `2px solid ${colors.grey[100]}`,
+            borderRadius: '8px',
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Typography variant="h4" component="h2" mb={3} color={colors.grey[100]}>
+            Edit Appointment
+          </Typography>
+
+          <Box component="form" noValidate sx={{ mt: 1 }}>
+            <FormControl fullWidth margin="normal" required>
+              <InputLabel sx={{ color: colors.grey[100] }}>Select Client</InputLabel>
+              <Select
+                value={editFormData.client_id}
+                onChange={(e) => setEditFormData({ ...editFormData, client_id: e.target.value })}
+                label="Select Client"
+                sx={{
+                  color: colors.grey[100],
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.grey[300] },
+                  '& .MuiSvgIcon-root': { color: colors.grey[100] },
+                }}
+              >
+                {clients.map((client) => (
+                  <MenuItem key={client.id} value={client.id}>{client.full_name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth margin="normal" required>
+              <InputLabel sx={{ color: colors.grey[100] }}>Select Doctor</InputLabel>
+              <Select
+                value={editFormData.doctor_id}
+                onChange={(e) => setEditFormData({ ...editFormData, doctor_id: e.target.value })}
+                label="Select Doctor"
+                sx={{
+                  color: colors.grey[100],
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.grey[300] },
+                  '& .MuiSvgIcon-root': { color: colors.grey[100] },
+                }}
+              >
+                {doctors.map((doctor) => (
+                  <MenuItem key={doctor.id} value={doctor.id}>{doctor.full_name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Date & Time"
+              type="datetime-local"
+              value={editFormData.date_time}
+              onChange={(e) => setEditFormData({ ...editFormData, date_time: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: colors.grey[100],
+                  '& fieldset': { borderColor: colors.grey[300] },
+                },
+                '& .MuiInputLabel-root': { color: colors.grey[100] },
+              }}
+            />
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Duration (minutes)"
+              type="number"
+              value={editFormData.duration_minutes}
+              onChange={(e) => setEditFormData({ ...editFormData, duration_minutes: parseInt(e.target.value) })}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: colors.grey[100],
+                  '& fieldset': { borderColor: colors.grey[300] },
+                },
+                '& .MuiInputLabel-root': { color: colors.grey[100] },
+              }}
+            />
+
+            <TextField
+              margin="normal"
+              fullWidth
+              label="Comment"
+              multiline
+              rows={3}
+              value={editFormData.comment}
+              onChange={(e) => setEditFormData({ ...editFormData, comment: e.target.value })}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: colors.grey[100],
+                  '& fieldset': { borderColor: colors.grey[300] },
+                },
+                '& .MuiInputLabel-root': { color: colors.grey[100] },
+              }}
+            />
+
+            <FormControl fullWidth margin="normal">
+              <InputLabel sx={{ color: colors.grey[100] }}>Status</InputLabel>
+              <Select
+                value={editFormData.status}
+                label="Status"
+                onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                sx={{
+                  color: colors.grey[100],
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.grey[300] },
+                  '& .MuiSvgIcon-root': { color: colors.grey[100] },
+                }}
+              >
+                <MenuItem value="scheduled">Scheduled</MenuItem>
+                <MenuItem value="confirmed">Confirmed</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Box display="flex" justifyContent="space-between" mt={3}>
+              <Button
+                variant="outlined"
+                onClick={() => setEditModalOpen(false)}
+                sx={{
+                  color: colors.grey[100],
+                  borderColor: colors.grey[400],
+                  "&:hover": { borderColor: colors.grey[100], backgroundColor: colors.grey[900] },
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleEditAppointmentSubmit}
+                sx={{
+                  backgroundColor: colors.greenAccent[600],
+                  color: colors.grey[100],
+                  "&:hover": { backgroundColor: colors.greenAccent[700] },
+                }}
+              >
+                Save Changes
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
+
+      {/* Delete Appointment Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        aria-labelledby="delete-dialog-title"
+        PaperProps={{
+          sx: {
+            backgroundColor: colors.primary[400],
+            border: `1px solid ${colors.grey[600]}`
+          }
+        }}
+      >
+        <DialogTitle id="delete-dialog-title" sx={{ color: colors.grey[100] }}>
+          Delete Appointment
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: colors.grey[300] }}>
+            Are you sure you want to delete this appointment? This action cannot be undone.
+            {selectedAppointment && selectedClient && selectedDoctor && (
+              <Box sx={{ mt: 2, p: 2, backgroundColor: colors.primary[500], borderRadius: 1 }}>
+                <Typography variant="body2" color={colors.grey[100]}>
+                  <strong>Client:</strong> {selectedClient.full_name}
+                </Typography>
+                <Typography variant="body2" color={colors.grey[100]}>
+                  <strong>Doctor:</strong> {selectedDoctor.full_name}
+                </Typography>
+                <Typography variant="body2" color={colors.grey[100]}>
+                  <strong>Date & Time:</strong> {new Date(selectedAppointment.date_time).toLocaleString()}
+                </Typography>
+              </Box>
+            )}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button
+            onClick={() => setDeleteConfirmOpen(false)}
+            variant="outlined"
+            sx={{
+              color: colors.grey[100],
+              borderColor: colors.grey[400],
+              "&:hover": { borderColor: colors.grey[100], backgroundColor: colors.grey[900] },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteAppointmentConfirm}
+            variant="contained"
+            disabled={deleteLoading}
+            sx={{
+              backgroundColor: colors.redAccent[600],
+              color: colors.grey[100],
+              "&:hover": { backgroundColor: colors.redAccent[700] },
+              "&:disabled": { backgroundColor: colors.grey[500], color: colors.grey[300] },
+            }}
+          >
+            {deleteLoading ? (
+              <Box display="flex" alignItems="center" gap={1}>
+                <CircularProgress size={20} color="inherit" />
+                Deleting...
+              </Box>
+            ) : (
+              'Delete Appointment'
+            )}
           </Button>
         </DialogActions>
       </Dialog>
