@@ -10,6 +10,7 @@ import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import MedicalServicesOutlinedIcon from "@mui/icons-material/MedicalServicesOutlined";
 // import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 // import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutlined";
 // import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
@@ -41,7 +42,14 @@ const Sidebar = () => {
     const colors = tokens(theme.palette.mode);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [selected, setSelected] = useState("Зубная формула");
-    
+
+    // Get user role from localStorage
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userRole = user.role || 'admin';
+
+    // Determine logo based on role
+    const logoPath = userRole === 'doctor' ? '/DOCTOR LOGO.png' : '/ADMIN LOGO.png';
+
   return (
     <Box
       sx={{
@@ -101,7 +109,7 @@ const Sidebar = () => {
                   alt="profile-user"
                   width="100px"
                   height="100px"
-                  src={`../../assets/user.png`}
+                  src={logoPath}
                   style={{ cursor: "pointer", borderRadius: "50%" }}
                 />
               </Box>
@@ -115,7 +123,7 @@ const Sidebar = () => {
                   ШАНС
                 </Typography>
                 <Typography variant="h5" color={colors.greenAccent[500]}>
-                  Панель администратора
+                  {userRole === 'doctor' ? 'Панель врача' : userRole === 'receptionist' ? 'Панель регистратора' : 'Панель администратора'}
                 </Typography>
               </Box>
             </Box>
@@ -125,7 +133,7 @@ const Sidebar = () => {
             <Item
               title="Зубная формула"
               to="/"
-              icon={<HomeOutlinedIcon />}
+              icon={<MedicalServicesOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />

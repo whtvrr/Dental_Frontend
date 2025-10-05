@@ -1,5 +1,6 @@
 import {Box, IconButton, useTheme, Typography, Menu, MenuItem, Chip} from "@mui/material";
 import {useContext, useState} from "react";
+import {useLocation} from "react-router-dom";
 import {ColorModeContext, tokens} from "../../theme";
 import {AuthContext} from "../../context/AuthContext";
 import InputBase from "@mui/material/InputBase";
@@ -17,6 +18,10 @@ const Topbar = () => {
     const colorMode = useContext(ColorModeContext);
     const { user, logout } = useContext(AuthContext);
     const [anchorEl, setAnchorEl] = useState(null);
+    const location = useLocation();
+
+    // Pages where search bar should be hidden
+    const hideSearchBarPages = ['/', '/registration', '/faq', '/calendar'];
     
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -50,9 +55,10 @@ const Topbar = () => {
     };
 
     return (
-    <Box display="flex" justifyContent="space-between" p={2}>
-    {/* Search Bar */}
-    <Box 
+    <Box display="flex" justifyContent={hideSearchBarPages.includes(location.pathname) ? "flex-end" : "space-between"} p={2}>
+    {/* Search Bar - Hidden on specific pages */}
+    {!hideSearchBarPages.includes(location.pathname) && (
+      <Box
         display="flex"
         backgroundColor={colors.primary[400]}
         borderRadius="3px"
@@ -62,6 +68,7 @@ const Topbar = () => {
             <SearchIcon/>
           </IconButton>
         </Box>
+    )}
         {/* ICONS */}
     <Box display="flex" alignItems="center" gap={1}>
         {/* User Info */}

@@ -1,4 +1,4 @@
-import { Box, useTheme, CircularProgress, Alert, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from "@mui/material";
+import { Box, useTheme, CircularProgress, Alert, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, InputLabel, Select, Grid } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -11,6 +11,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import AddIcon from "@mui/icons-material/Add";
+import PersonAdd from "@mui/icons-material/PersonAdd";
 import Header from "../../components/Header";
 import { useApi } from "../../hooks/useApi";
 import API_CONFIG from "../../config/api";
@@ -28,6 +30,7 @@ const Contacts = () => {
   const [limit] = useState(50);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [editFormData, setEditFormData] = useState({
     full_name: '',
@@ -36,6 +39,15 @@ const Contacts = () => {
     gender: '',
     birth_date: '',
   });
+  const [newClientData, setNewClientData] = useState({
+    full_name: '',
+    phone_number: '',
+    address: '',
+    gender: 'male',
+    birth_date: '',
+  });
+  const [clientLoading, setClientLoading] = useState(false);
+  const [clientError, setClientError] = useState(null);
 
   const formatDate = (dateString) => {
     if (!dateString) return translations.notSpecified;
@@ -104,6 +116,55 @@ const Contacts = () => {
       setError(err.message);
       console.error('Failed to delete client:', err);
     }
+  };
+
+  const handleAddClientClick = () => {
+    setNewClientData({
+      full_name: '',
+      phone_number: '',
+      address: '',
+      gender: 'male',
+      birth_date: '',
+    });
+    setClientError(null);
+    setAddDialogOpen(true);
+  };
+
+  const handleCreateClient = async () => {
+    setClientLoading(true);
+    setClientError(null);
+
+    try {
+      const response = await api.post(API_CONFIG.ENDPOINTS.USERS.CLIENTS, newClientData);
+
+      if (response.ok) {
+        const data = await response.json();
+        setAddDialogOpen(false);
+        setNewClientData({
+          full_name: '',
+          phone_number: '',
+          address: '',
+          gender: 'male',
+          birth_date: '',
+        });
+        fetchClients();
+      } else {
+        const errorData = await response.json();
+        setClientError(errorData.message || 'Failed to create client');
+      }
+    } catch (err) {
+      setClientError(err.message);
+      console.error('Failed to create client:', err);
+    } finally {
+      setClientLoading(false);
+    }
+  };
+
+  const handleClientInputChange = (field, value) => {
+    setNewClientData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const columns = [
@@ -210,10 +271,25 @@ const Contacts = () => {
 
   return (
     <Box m="20px">
-      <Header
-        title={translations.contactsTitle}
-        subtitle={translations.contactsSubtitle}
-      />
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb="20px">
+        <Header
+          title={translations.contactsTitle}
+          subtitle={translations.contactsSubtitle}
+        />
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleAddClientClick}
+          sx={{
+            backgroundColor: colors.greenAccent[600],
+            '&:hover': {
+              backgroundColor: colors.greenAccent[700],
+            },
+          }}
+        >
+          Добавить нового клиента
+        </Button>
+      </Box>
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -335,6 +411,200 @@ const Contacts = () => {
           </Button>
           <Button onClick={handleEditSubmit} variant="contained" sx={{ backgroundColor: colors.greenAccent[600] }}>
             {translations.save}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add Client Dialog */}
+      <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ backgroundColor: colors.primary[400], color: colors.grey[100] }}>
+          Добавить нового клиента
+        </DialogTitle>
+        <DialogContent sx={{ backgroundColor: colors.primary[400], pt: 2 }}>
+          {clientError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {clientError}
+            </Alert>
+          )}
+
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="full_name"
+                label="Полное имя"
+                name="full_name"
+                value={newClientData.full_name}
+                onChange={(e) => handleClientInputChange('full_name', e.target.value)}
+                disabled={clientLoading}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    color: colors.grey[100],
+                    '& fieldset': {
+                      borderColor: colors.grey[300],
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: colors.grey[100],
+                  },
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="phone_number"
+                label="Номер телефона"
+                name="phone_number"
+                value={newClientData.phone_number}
+                onChange={(e) => handleClientInputChange('phone_number', e.target.value)}
+                disabled={clientLoading}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    color: colors.grey[100],
+                    '& fieldset': {
+                      borderColor: colors.grey[300],
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: colors.grey[100],
+                  },
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth margin="normal" required>
+                <InputLabel
+                  sx={{ color: colors.grey[100] }}
+                >
+                  Пол
+                </InputLabel>
+                <Select
+                  value={newClientData.gender}
+                  onChange={(e) => handleClientInputChange('gender', e.target.value)}
+                  label="Пол"
+                  disabled={clientLoading}
+                  sx={{
+                    color: colors.grey[100],
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: colors.grey[300],
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: colors.grey[100],
+                    },
+                  }}
+                >
+                  <MenuItem value="male">Мужской</MenuItem>
+                  <MenuItem value="female">Женский</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="birth_date"
+                label="Дата рождения (ДД.ММ.ГГГГ)"
+                name="birth_date"
+                placeholder="24.06.2003"
+                value={newClientData.birth_date}
+                onChange={(e) => handleClientInputChange('birth_date', e.target.value)}
+                disabled={clientLoading}
+                helperText="Формат: ДД.ММ.ГГГГ (например, 24.06.2003)"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    color: colors.grey[100],
+                    '& fieldset': {
+                      borderColor: colors.grey[300],
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: colors.grey[100],
+                  },
+                  '& .MuiFormHelperText-root': {
+                    color: colors.grey[300],
+                  },
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="address"
+                label="Адрес"
+                name="address"
+                value={newClientData.address}
+                onChange={(e) => handleClientInputChange('address', e.target.value)}
+                disabled={clientLoading}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    color: colors.grey[100],
+                    '& fieldset': {
+                      borderColor: colors.grey[300],
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: colors.grey[100],
+                  },
+                }}
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ backgroundColor: colors.primary[400], p: 3 }}>
+          <Button
+            onClick={() => setAddDialogOpen(false)}
+            variant="outlined"
+            disabled={clientLoading}
+            sx={{
+              color: colors.grey[100],
+              borderColor: colors.grey[400],
+              "&:hover": {
+                borderColor: colors.grey[100],
+                backgroundColor: colors.grey[900],
+              },
+            }}
+          >
+            Отмена
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleCreateClient}
+            disabled={clientLoading || !newClientData.full_name || !newClientData.phone_number || !newClientData.address || !newClientData.birth_date}
+            sx={{
+              backgroundColor: colors.greenAccent[600],
+              color: colors.grey[100],
+              "&:hover": {
+                backgroundColor: colors.greenAccent[700],
+              },
+              "&:disabled": {
+                backgroundColor: colors.grey[500],
+                color: colors.grey[300],
+              },
+            }}
+          >
+            {clientLoading ? (
+              <Box display="flex" alignItems="center" gap={1}>
+                <CircularProgress size={20} color="inherit" />
+                Создание...
+              </Box>
+            ) : (
+              <Box display="flex" alignItems="center" gap={1}>
+                <PersonAdd />
+                Создать клиента
+              </Box>
+            )}
           </Button>
         </DialogActions>
       </Dialog>

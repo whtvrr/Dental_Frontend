@@ -1162,7 +1162,7 @@ const Calendar = () => {
             mb={3}
             color={colors.grey[100]}
           >
-            Add New Client
+            Добавить нового клиента
           </Typography>
           
           {clientError && (
@@ -1179,7 +1179,7 @@ const Calendar = () => {
                   required
                   fullWidth
                   id="full_name"
-                  label="Full Name"
+                  label="Полное имя"
                   name="full_name"
                   value={newClientData.full_name}
                   onChange={(e) => handleClientInputChange('full_name', e.target.value)}
@@ -1204,7 +1204,7 @@ const Calendar = () => {
                   required
                   fullWidth
                   id="phone_number"
-                  label="Phone Number"
+                  label="Номер телефона"
                   name="phone_number"
                   value={newClientData.phone_number}
                   onChange={(e) => handleClientInputChange('phone_number', e.target.value)}
@@ -1225,15 +1225,15 @@ const Calendar = () => {
               
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth margin="normal" required>
-                  <InputLabel 
+                  <InputLabel
                     sx={{ color: colors.grey[100] }}
                   >
-                    Gender
+                    Пол
                   </InputLabel>
                   <Select
                     value={newClientData.gender}
                     onChange={(e) => handleClientInputChange('gender', e.target.value)}
-                    label="Gender"
+                    label="Пол"
                     disabled={clientLoading}
                     sx={{
                       color: colors.grey[100],
@@ -1245,8 +1245,8 @@ const Calendar = () => {
                       },
                     }}
                   >
-                    <MenuItem value="male">Male</MenuItem>
-                    <MenuItem value="female">Female</MenuItem>
+                    <MenuItem value="male">Мужской</MenuItem>
+                    <MenuItem value="female">Женский</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -1257,7 +1257,7 @@ const Calendar = () => {
                   required
                   fullWidth
                   id="address"
-                  label="Address"
+                  label="Адрес"
                   name="address"
                   value={newClientData.address}
                   onChange={(e) => handleClientInputChange('address', e.target.value)}
@@ -1282,13 +1282,13 @@ const Calendar = () => {
                   required
                   fullWidth
                   id="birth_date"
-                  label="Birth Date (DD.MM.YYYY)"
+                  label="Дата рождения (ДД.ММ.ГГГГ)"
                   name="birth_date"
                   placeholder="24.06.2003"
                   value={newClientData.birth_date}
                   onChange={(e) => handleClientInputChange('birth_date', e.target.value)}
                   disabled={clientLoading}
-                  helperText="Format: DD.MM.YYYY (e.g., 24.06.2003)"
+                  helperText="Формат: ДД.ММ.ГГГГ (например, 24.06.2003)"
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       color: colors.grey[100],
@@ -1318,7 +1318,7 @@ const Calendar = () => {
                   },
                 }}
               >
-                Cancel
+                Отмена
               </Button>
               <Button
                 variant="contained"
@@ -1339,12 +1339,12 @@ const Calendar = () => {
                 {clientLoading ? (
                   <Box display="flex" alignItems="center" gap={1}>
                     <CircularProgress size={20} color="inherit" />
-                    Creating...
+                    Создание...
                   </Box>
                 ) : (
                   <Box display="flex" alignItems="center" gap={1}>
                     <PersonAdd />
-                    Create Client
+                    Создать клиента
                   </Box>
                 )}
               </Button>
@@ -1402,7 +1402,7 @@ const Calendar = () => {
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color={colors.grey[300]}>
-                          Name
+                          Имя
                         </Typography>
                         <Typography variant="body1" color={colors.grey[100]}>
                           {selectedClient?.full_name || `Client ${selectedAppointment.client_id.slice(-4)}`}
@@ -1410,7 +1410,7 @@ const Calendar = () => {
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color={colors.grey[300]}>
-                          Phone
+                          Телефон
                         </Typography>
                         <Typography variant="body1" color={colors.grey[100]}>
                           {selectedClient?.phone_number || 'N/A'}
@@ -1419,7 +1419,7 @@ const Calendar = () => {
                       {selectedClient?.address && (
                         <Grid item xs={12} sm={6}>
                           <Typography variant="subtitle2" color={colors.grey[300]}>
-                            Address
+                            Адрес
                           </Typography>
                           <Typography variant="body1" color={colors.grey[100]}>
                             {selectedClient.address}
@@ -1429,17 +1429,17 @@ const Calendar = () => {
                       {selectedClient?.gender && (
                         <Grid item xs={12} sm={6}>
                           <Typography variant="subtitle2" color={colors.grey[300]}>
-                            Gender
+                            Пол
                           </Typography>
                           <Typography variant="body1" color={colors.grey[100]} sx={{ textTransform: 'capitalize' }}>
-                            {selectedClient.gender}
+                            {selectedClient.gender === 'male' ? 'Мужской' : selectedClient.gender === 'female' ? 'Женский' : selectedClient.gender}
                           </Typography>
                         </Grid>
                       )}
                       {selectedClient?.birth_date && (
                         <Grid item xs={12}>
                           <Typography variant="subtitle2" color={colors.grey[300]}>
-                            Birth Date
+                            Дата рождения
                           </Typography>
                           <Typography variant="body1" color={colors.grey[100]}>
                             {new Date(selectedClient.birth_date).toLocaleDateString()}
@@ -1459,7 +1459,7 @@ const Calendar = () => {
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color={colors.grey[300]}>
-                          Name
+                          Имя
                         </Typography>
                         <Typography variant="body1" color={colors.grey[100]}>
                           {selectedDoctor?.full_name || `Doctor ${selectedAppointment.doctor_id.slice(-4)}`}
@@ -1467,7 +1467,7 @@ const Calendar = () => {
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color={colors.grey[300]}>
-                          Phone
+                          Телефон
                         </Typography>
                         <Typography variant="body1" color={colors.grey[100]}>
                           {selectedDoctor?.phone_number || 'N/A'}
@@ -1490,13 +1490,13 @@ const Calendar = () => {
                 {/* Appointment Details */}
                 <Grid item xs={12}>
                   <Typography variant="h6" color={colors.grey[200]} gutterBottom>
-                    Appointment Details
+                    Детали записи
                   </Typography>
                   <Box sx={{ bgcolor: colors.primary[500], p: 2, borderRadius: 1 }}>
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color={colors.grey[300]}>
-                          Date & Time
+                          Дата и время
                         </Typography>
                         <Typography variant="body1" color={colors.grey[100]}>
                           {new Date(selectedAppointment.date_time).toLocaleString()}
@@ -1504,15 +1504,15 @@ const Calendar = () => {
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color={colors.grey[300]}>
-                          Duration
+                          Длительность
                         </Typography>
                         <Typography variant="body1" color={colors.grey[100]}>
-                          {selectedAppointment.duration_minutes} minutes
+                          {selectedAppointment.duration_minutes} минут
                         </Typography>
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color={colors.grey[300]}>
-                          Status
+                          Статус
                         </Typography>
                         <Typography 
                           variant="body1" 
@@ -1530,7 +1530,7 @@ const Calendar = () => {
                       {selectedAppointment.comment && (
                         <Grid item xs={12}>
                           <Typography variant="subtitle2" color={colors.grey[300]}>
-                            Comment
+                            Комментарий
                           </Typography>
                           <Typography variant="body1" color={colors.grey[100]}>
                             {selectedAppointment.comment}
@@ -1566,7 +1566,7 @@ const Calendar = () => {
                     },
                   }}
                 >
-                  Edit
+                  Редактировать
                 </Button>
               )}
 
@@ -1584,7 +1584,7 @@ const Calendar = () => {
                     },
                   }}
                 >
-                  Delete
+                  Удалить
                 </Button>
               )}
 
@@ -1614,10 +1614,10 @@ const Calendar = () => {
                   {cancelLoading ? (
                     <Box display="flex" alignItems="center" gap={1}>
                       <CircularProgress size={16} color="inherit" />
-                      Canceling...
+                      Отмена...
                     </Box>
                   ) : (
-                    'Cancel'
+                    'Отменить'
                   )}
                 </Button>
               )}
@@ -1640,7 +1640,7 @@ const Calendar = () => {
                     },
                   }}
                 >
-                  Complete
+                  Завершить
                 </Button>
               )}
 
@@ -1666,7 +1666,7 @@ const Calendar = () => {
                     }
                   }}
                 >
-                  {(selectedAppointment.status === 'canceled' || selectedAppointment.status?.toLowerCase() === 'canceled') ? 'CANCELED' : 'COMPLETED'}
+                  {(selectedAppointment.status === 'canceled' || selectedAppointment.status?.toLowerCase() === 'canceled') ? 'ОТМЕНЕНА' : 'ЗАВЕРШЕНА'}
                 </Button>
               )}
             </Box>
@@ -1686,7 +1686,7 @@ const Calendar = () => {
                   },
                 }}
               >
-                Close
+                Закрыть
               </Button>
             </Box>
           </Box>
@@ -1706,28 +1706,28 @@ const Calendar = () => {
           }
         }}
       >
-        <DialogTitle 
+        <DialogTitle
           id="cancel-dialog-title"
           sx={{ color: colors.grey[100] }}
         >
-          Cancel Appointment
+          Отменить запись
         </DialogTitle>
         <DialogContent>
-          <DialogContentText 
+          <DialogContentText
             id="cancel-dialog-description"
             sx={{ color: colors.grey[300] }}
           >
-            Are you sure you want to cancel this appointment?
+            Вы уверены, что хотите отменить эту запись?
             {selectedAppointment && selectedClient && selectedDoctor && (
               <Box sx={{ mt: 2, p: 2, backgroundColor: colors.primary[500], borderRadius: 1 }}>
                 <Typography variant="body2" color={colors.grey[100]}>
-                  <strong>Client:</strong> {selectedClient.full_name}
+                  <strong>Клиент:</strong> {selectedClient.full_name}
                 </Typography>
                 <Typography variant="body2" color={colors.grey[100]}>
-                  <strong>Doctor:</strong> {selectedDoctor.full_name}
+                  <strong>Врач:</strong> {selectedDoctor.full_name}
                 </Typography>
                 <Typography variant="body2" color={colors.grey[100]}>
-                  <strong>Date & Time:</strong> {new Date(selectedAppointment.date_time).toLocaleString()}
+                  <strong>Дата и время:</strong> {new Date(selectedAppointment.date_time).toLocaleString()}
                 </Typography>
               </Box>
             )}
@@ -1746,9 +1746,9 @@ const Calendar = () => {
               },
             }}
           >
-            No, Keep Appointment
+            Нет, оставить
           </Button>
-          <Button 
+          <Button
             onClick={handleCancelAppointmentConfirm}
             variant="contained"
             disabled={cancelLoading}
@@ -1767,10 +1767,10 @@ const Calendar = () => {
             {cancelLoading ? (
               <Box display="flex" alignItems="center" gap={1}>
                 <CircularProgress size={20} color="inherit" />
-                Canceling...
+                Отмена...
               </Box>
             ) : (
-              'Yes, Cancel Appointment'
+              'Да, отменить запись'
             )}
           </Button>
         </DialogActions>
@@ -1791,10 +1791,10 @@ const Calendar = () => {
         }}
       >
         <DialogTitle sx={{ color: colors.grey[100] }}>
-          Complete Appointment
+          Завершить запись
           {selectedAppointment && selectedClient && selectedDoctor && (
             <Typography variant="subtitle1" color={colors.grey[300]} sx={{ mt: 1 }}>
-              {selectedClient.full_name} with Dr. {selectedDoctor.full_name}
+              {selectedClient.full_name} у доктора {selectedDoctor.full_name}
             </Typography>
           )}
         </DialogTitle>
@@ -1804,7 +1804,7 @@ const Calendar = () => {
             <Box display="flex" justifyContent="center" alignItems="center" p={3}>
               <CircularProgress />
               <Typography variant="body1" sx={{ ml: 2, color: colors.grey[100] }}>
-                Loading medical data...
+                Загрузка медицинских данных...
               </Typography>
             </Box>
           ) : (
@@ -1812,7 +1812,7 @@ const Calendar = () => {
               {/* Anamnesis - Full width at top */}
               <TextField
                 fullWidth
-                label="Anamnesis"
+                label="Анамнез"
                 multiline
                 rows={3}
                 value={completeFormData.anamnesis}
@@ -1855,7 +1855,7 @@ const Calendar = () => {
                       }}
                     />
                   }
-                  label="Use custom complaint"
+                  label="Использовать свою жалобу"
                   sx={{
                     '& .MuiFormControlLabel-label': {
                       color: colors.grey[100],
@@ -1870,7 +1870,7 @@ const Calendar = () => {
                     <Select
                       value={completeFormData.complaint_id}
                       onChange={(e) => handleCompleteFormChange('complaint_id', e.target.value)}
-                      label="Select Complaint"
+                      label="Выбрать жалобу"
                       displayEmpty
                       fullWidth
                       sx={{
@@ -1884,7 +1884,7 @@ const Calendar = () => {
                       }}
                     >
                       <MenuItem value="">
-                        <em>No complaint selected</em>
+                        <em>Жалоба не выбрана</em>
                       </MenuItem>
                       {complaints.map((complaint) => (
                         <MenuItem key={complaint.id} value={complaint.id}>
@@ -1896,7 +1896,7 @@ const Calendar = () => {
                 ) : (
                   <TextField
                     fullWidth
-                    label="Custom Complaint"
+                    label="Своя жалоба"
                     multiline
                     rows={3}
                     value={completeFormData.custom_complaint}
@@ -1923,7 +1923,7 @@ const Calendar = () => {
                     <Select
                       value={completeFormData.diagnosis_id}
                       onChange={(e) => handleCompleteFormChange('diagnosis_id', e.target.value)}
-                      label="Diagnosis Status"
+                      label="Статус диагноза"
                       displayEmpty
                       fullWidth
                       sx={{
@@ -1937,7 +1937,7 @@ const Calendar = () => {
                       }}
                     >
                       <MenuItem value="">
-                        <em>No diagnosis selected</em>
+                        <em>Диагноз не выбран</em>
                       </MenuItem>
                       {diagnosisStatuses.map((status) => (
                         <MenuItem key={status.id} value={status.id}>
@@ -1953,7 +1953,7 @@ const Calendar = () => {
                     <Select
                       value={completeFormData.treatment_id}
                       onChange={(e) => handleCompleteFormChange('treatment_id', e.target.value)}
-                      label="Treatment Status"
+                      label="Статус лечения"
                       displayEmpty
                       fullWidth
                       sx={{
@@ -1967,7 +1967,7 @@ const Calendar = () => {
                       }}
                     >
                       <MenuItem value="">
-                        <em>No treatment selected</em>
+                        <em>Лечение не выбрано</em>
                       </MenuItem>
                       {treatmentStatuses.map((status) => (
                         <MenuItem key={status.id} value={status.id}>
@@ -1982,7 +1982,7 @@ const Calendar = () => {
               {/* Comment */}
               <TextField
                 fullWidth
-                label="Comments"
+                label="Комментарии"
                 multiline
                 rows={3}
                 value={completeFormData.comment}
@@ -2014,7 +2014,7 @@ const Calendar = () => {
                     },
                   }}
                 >
-                  Edit Formula
+                  Редактировать формулу
                 </Button>
               </Box>
             </Box>
@@ -2022,7 +2022,7 @@ const Calendar = () => {
         </DialogContent>
 
         <DialogActions sx={{ p: 3 }}>
-          <Button 
+          <Button
             onClick={handleCompleteAppointmentCancel}
             variant="outlined"
             disabled={completeLoading}
@@ -2035,9 +2035,9 @@ const Calendar = () => {
               },
             }}
           >
-            Cancel
+            Отмена
           </Button>
-          <Button 
+          <Button
             onClick={handleCompleteAppointmentSubmit}
             variant="contained"
             disabled={completeLoading || complaintsLoading}
@@ -2056,10 +2056,10 @@ const Calendar = () => {
             {completeLoading ? (
               <Box display="flex" alignItems="center" gap={1}>
                 <CircularProgress size={20} color="inherit" />
-                Completing...
+                Завершение...
               </Box>
             ) : (
-              'Complete Appointment'
+              'Завершить запись'
             )}
           </Button>
         </DialogActions>
@@ -2081,10 +2081,10 @@ const Calendar = () => {
         }}
       >
         <DialogTitle sx={{ color: colors.grey[100] }}>
-          Dental Chart
+          Зубная формула
           {selectedAppointment && selectedClient && (
             <Typography variant="subtitle1" color={colors.grey[300]} sx={{ mt: 1 }}>
-              Dental formula for {selectedClient.full_name}
+              Зубная формула для {selectedClient.full_name}
             </Typography>
           )}
         </DialogTitle>
@@ -2113,7 +2113,7 @@ const Calendar = () => {
               },
             }}
           >
-            Close
+            Закрыть
           </Button>
         </DialogActions>
       </Dialog>
@@ -2139,16 +2139,16 @@ const Calendar = () => {
           }}
         >
           <Typography variant="h4" component="h2" mb={3} color={colors.grey[100]}>
-            Edit Appointment
+            Редактировать запись
           </Typography>
 
           <Box component="form" noValidate sx={{ mt: 1 }}>
             <FormControl fullWidth margin="normal" required>
-              <InputLabel sx={{ color: colors.grey[100] }}>Select Client</InputLabel>
+              <InputLabel sx={{ color: colors.grey[100] }}>Выбрать клиента</InputLabel>
               <Select
                 value={editFormData.client_id}
                 onChange={(e) => setEditFormData({ ...editFormData, client_id: e.target.value })}
-                label="Select Client"
+                label="Выбрать клиента"
                 sx={{
                   color: colors.grey[100],
                   '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.grey[300] },
@@ -2162,11 +2162,11 @@ const Calendar = () => {
             </FormControl>
 
             <FormControl fullWidth margin="normal" required>
-              <InputLabel sx={{ color: colors.grey[100] }}>Select Doctor</InputLabel>
+              <InputLabel sx={{ color: colors.grey[100] }}>Выбрать врача</InputLabel>
               <Select
                 value={editFormData.doctor_id}
                 onChange={(e) => setEditFormData({ ...editFormData, doctor_id: e.target.value })}
-                label="Select Doctor"
+                label="Выбрать врача"
                 sx={{
                   color: colors.grey[100],
                   '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.grey[300] },
@@ -2183,7 +2183,7 @@ const Calendar = () => {
               margin="normal"
               required
               fullWidth
-              label="Date & Time"
+              label="Дата и время"
               type="datetime-local"
               value={editFormData.date_time}
               onChange={(e) => setEditFormData({ ...editFormData, date_time: e.target.value })}
@@ -2201,7 +2201,7 @@ const Calendar = () => {
               margin="normal"
               required
               fullWidth
-              label="Duration (minutes)"
+              label="Длительность (минуты)"
               type="number"
               value={editFormData.duration_minutes}
               onChange={(e) => setEditFormData({ ...editFormData, duration_minutes: parseInt(e.target.value) })}
@@ -2217,7 +2217,7 @@ const Calendar = () => {
             <TextField
               margin="normal"
               fullWidth
-              label="Comment"
+              label="Комментарий"
               multiline
               rows={3}
               value={editFormData.comment}
@@ -2232,10 +2232,10 @@ const Calendar = () => {
             />
 
             <FormControl fullWidth margin="normal">
-              <InputLabel sx={{ color: colors.grey[100] }}>Status</InputLabel>
+              <InputLabel sx={{ color: colors.grey[100] }}>Статус</InputLabel>
               <Select
                 value={editFormData.status}
-                label="Status"
+                label="Статус"
                 onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
                 sx={{
                   color: colors.grey[100],
@@ -2243,8 +2243,8 @@ const Calendar = () => {
                   '& .MuiSvgIcon-root': { color: colors.grey[100] },
                 }}
               >
-                <MenuItem value="scheduled">Scheduled</MenuItem>
-                <MenuItem value="confirmed">Confirmed</MenuItem>
+                <MenuItem value="scheduled">Запланирована</MenuItem>
+                <MenuItem value="confirmed">Подтверждена</MenuItem>
               </Select>
             </FormControl>
 
@@ -2258,7 +2258,7 @@ const Calendar = () => {
                   "&:hover": { borderColor: colors.grey[100], backgroundColor: colors.grey[900] },
                 }}
               >
-                Cancel
+                Отмена
               </Button>
               <Button
                 variant="contained"
@@ -2269,7 +2269,7 @@ const Calendar = () => {
                   "&:hover": { backgroundColor: colors.greenAccent[700] },
                 }}
               >
-                Save Changes
+                Сохранить изменения
               </Button>
             </Box>
           </Box>
@@ -2289,21 +2289,21 @@ const Calendar = () => {
         }}
       >
         <DialogTitle id="delete-dialog-title" sx={{ color: colors.grey[100] }}>
-          Delete Appointment
+          Удалить запись
         </DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ color: colors.grey[300] }}>
-            Are you sure you want to delete this appointment? This action cannot be undone.
+            Вы уверены, что хотите удалить эту запись? Это действие нельзя отменить.
             {selectedAppointment && selectedClient && selectedDoctor && (
               <Box sx={{ mt: 2, p: 2, backgroundColor: colors.primary[500], borderRadius: 1 }}>
                 <Typography variant="body2" color={colors.grey[100]}>
-                  <strong>Client:</strong> {selectedClient.full_name}
+                  <strong>Клиент:</strong> {selectedClient.full_name}
                 </Typography>
                 <Typography variant="body2" color={colors.grey[100]}>
-                  <strong>Doctor:</strong> {selectedDoctor.full_name}
+                  <strong>Врач:</strong> {selectedDoctor.full_name}
                 </Typography>
                 <Typography variant="body2" color={colors.grey[100]}>
-                  <strong>Date & Time:</strong> {new Date(selectedAppointment.date_time).toLocaleString()}
+                  <strong>Дата и время:</strong> {new Date(selectedAppointment.date_time).toLocaleString()}
                 </Typography>
               </Box>
             )}
@@ -2319,7 +2319,7 @@ const Calendar = () => {
               "&:hover": { borderColor: colors.grey[100], backgroundColor: colors.grey[900] },
             }}
           >
-            Cancel
+            Отмена
           </Button>
           <Button
             onClick={handleDeleteAppointmentConfirm}
@@ -2335,10 +2335,10 @@ const Calendar = () => {
             {deleteLoading ? (
               <Box display="flex" alignItems="center" gap={1}>
                 <CircularProgress size={20} color="inherit" />
-                Deleting...
+                Удаление...
               </Box>
             ) : (
-              'Delete Appointment'
+              'Удалить запись'
             )}
           </Button>
         </DialogActions>

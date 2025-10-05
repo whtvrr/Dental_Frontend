@@ -14,6 +14,8 @@ export const translations = {
   loading: 'Загрузка',
   error: 'Ошибка',
   success: 'Успешно',
+  exportDocument: 'Экспорт документа',
+  print: 'Печать',
 
   // User roles
   admin: 'Администратор',

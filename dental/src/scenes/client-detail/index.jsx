@@ -30,7 +30,8 @@ import {
   Edit,
   Event as EventIcon,
   Schedule as ScheduleIcon,
-  MedicalServices as MedicalIcon
+  MedicalServices as MedicalIcon,
+  Download as DownloadIcon
 } from '@mui/icons-material';
 import { tokens } from '../../theme';
 import Header from '../../components/Header';
@@ -39,6 +40,7 @@ import API_CONFIG from '../../config/api';
 import DentalChart from '../../components/dental-chart/DentalChart';
 import AppointmentDetailsModal from '../../components/AppointmentDetailsModal';
 import { translations, translateGender, translateStatus } from '../../utils/translations';
+import { exportMedicalDocument } from '../../utils/exportMedicalDocument';
 
 const ClientDetail = () => {
   const theme = useTheme();
@@ -274,6 +276,18 @@ const ClientDetail = () => {
   const handleAppointmentClick = (appointment) => {
     setSelectedAppointment(appointment);
     setAppointmentDetailsOpen(true);
+  };
+
+  const handleExportMedicalDocument = (appointment, event) => {
+    event.stopPropagation(); // Prevent opening appointment details modal
+
+    // Find doctor data
+    const doctor = doctors.find(d => d.id === appointment.doctor_id) || {
+      full_name: 'Не указано'
+    };
+
+    // Export the document
+    exportMedicalDocument(appointment, client, doctor);
   };
 
   const getClientName = (clientId) => {
@@ -617,6 +631,26 @@ const ClientDetail = () => {
                             </Box>
                           }
                         />
+                        {/* Export button for completed appointments */}
+                        {appointment.status === 'completed' && (
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<DownloadIcon />}
+                            onClick={(e) => handleExportMedicalDocument(appointment, e)}
+                            sx={{
+                              ml: 2,
+                              borderColor: colors.greenAccent[400],
+                              color: colors.greenAccent[400],
+                              '&:hover': {
+                                borderColor: colors.greenAccent[300],
+                                backgroundColor: colors.greenAccent[900],
+                              },
+                            }}
+                          >
+                            Экспорт документа
+                          </Button>
+                        )}
                       </ListItem>
                     </React.Fragment>
                   ))}

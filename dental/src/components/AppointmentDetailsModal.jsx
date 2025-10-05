@@ -33,13 +33,15 @@ import {
   MedicalServices as MedicalIcon,
   ExpandMore as ExpandMoreIcon,
   Edit as EditIcon,
-  Delete as DeleteIcon
+  Delete as DeleteIcon,
+  Print as PrintIcon
 } from '@mui/icons-material';
 import { tokens } from '../theme';
 import { useApi } from '../hooks/useApi';
 import API_CONFIG from '../config/api';
 import DentalChart from './dental-chart/DentalChart';
 import { translations, translateStatus } from '../utils/translations';
+import { exportMedicalDocumentFormatted } from '../utils/exportMedicalDocumentFormatted';
 
 const AppointmentDetailsModal = ({
   open,
@@ -423,6 +425,39 @@ const AppointmentDetailsModal = ({
     }
   };
 
+  const handleExportDocument = async () => {
+    if (!appointment || !appointmentData) return;
+
+    try {
+      // Prepare client data
+      const clientData = {
+        full_name: clientName,
+        birth_date: null, // Would need to be fetched separately if needed
+        gender: null, // Would need to be fetched separately if needed
+        phone_number: null, // Would need to be fetched separately if needed
+        address: null // Would need to be fetched separately if needed
+      };
+
+      // Prepare doctor data
+      const doctorData = {
+        full_name: doctorName
+      };
+
+      // Prepare appointment data with medical information
+      const appointmentExportData = {
+        ...appointmentData,
+        complaint: medicalData.complaint,
+        diagnosis: medicalData.diagnosis,
+        treatment: medicalData.treatment
+      };
+
+      // Export the document with proper formatting like the example
+      exportMedicalDocumentFormatted(appointmentExportData, clientData, doctorData);
+    } catch (error) {
+      console.error('Error exporting medical document:', error);
+    }
+  };
+
   if (!appointment) return null;
 
   return (
@@ -740,6 +775,26 @@ const AppointmentDetailsModal = ({
         justifyContent: 'space-between'
       }}>
         <Box display="flex" gap={2}>
+          {/* Export Medical Document button */}
+          <Button
+            onClick={handleExportDocument}
+            variant="contained"
+            startIcon={<PrintIcon />}
+            disabled={medicalDataLoading}
+            sx={{
+              backgroundColor: colors.greenAccent[600],
+              color: colors.grey[100],
+              '&:hover': {
+                backgroundColor: colors.greenAccent[700]
+              },
+              '&:disabled': {
+                backgroundColor: colors.grey[500]
+              }
+            }}
+          >
+            {translations.exportDocument}
+          </Button>
+
           {/* Edit button - only show for scheduled/confirmed appointments */}
           {appointment && (appointment.status === 'scheduled' || appointment.status === 'confirmed') && (
             <Button
